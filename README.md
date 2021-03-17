@@ -2,7 +2,7 @@
 ## Predlog projekta
 Za projekt sva si izbrala analizo rezultatov smučarskih skokov. 
 Projekt bo zajemal podatke o tekmovanjih in dosežkih tekmovalcev iz 
-spletne strani https://www.fis-ski.com/DB/general/event-details.html.
+spletne strani https://www.fis-ski.com/DB/ski-jumping/calendar-results.html.
 
 ## Glavne funkcionalnosti rešitve
 - Vpogled v posamezno tekmovaje,
