@@ -6,9 +6,9 @@ spletne strani https://www.fis-ski.com/DB/ski-jumping/calendar-results.html.
 
 ## Glavne funkcionalnosti rešitve
 - Vpogled v posamezno tekmovaje,
-- ''statistični'' prikaz rezultatov (povprečna dolžina skoka, \ldots),
+- ''statistični'' prikaz rezultatov (povprečna dolžina skoka, ...),
 - grafični prikaz podatkov,
-- možnost izbire parametrov (lokacija, sezona, velikost skakalnice, \ldots).
+- možnost izbire parametrov (lokacija, sezona, velikost skakalnice, ...).
 
 ## Terminski plan projekta
 1. teden: seznanitev s pridobivanjem podaktov iz vira, 

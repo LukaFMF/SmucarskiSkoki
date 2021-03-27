@@ -3,7 +3,7 @@ import re, requests, tools as t, time
 
 class Event:
 	pass
-
+		
 class Competition:
 	pass
 
