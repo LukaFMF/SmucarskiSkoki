@@ -2,7 +2,7 @@ import tools as t
 
 event = t.ReadEvent(45208)
 print(event.location)
-print(event.competitions[0].results[25].totalPoints)
+print(event.competitions[0].gender)
 
 # Glavna stran
 # leto = 2021

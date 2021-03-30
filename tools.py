@@ -238,7 +238,7 @@ def ReadEvent(eventId):
 			competition = Competition()
 			competition.raceId = s.unpack("I",data[offset:offset+4])[0]
 			offset += 4
-			competition.gender = s.unpack("c",data[offset:offset+1])[0]
+			competition.gender = s.unpack("c",data[offset:offset+1])[0].decode()
 			offset += 1
 			event.category,offset = UnpackStrFromBytes(data,offset)
 
