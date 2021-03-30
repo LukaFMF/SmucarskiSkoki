@@ -209,7 +209,7 @@ def WriteEventToFile(event):
 def UnpackStrFromBytes(data,offset):
 	''' Prebere dozino niz in niz na lokaciji offset in vrne ta niz ter nov offset '''
 	length = s.unpack("I",data[offset:offset+4])[0] # prebermo dolzino niza
-	string = s.unpack(f"{length}s",data[offset+4:offset+length+4])[0]
+	string = s.unpack(f"{length}s",data[offset+4:offset+length+4])[0].decode()
 	return string, offset + length + 4 
 
 def ReadEvent(eventId):
