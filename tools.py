@@ -55,69 +55,69 @@ class Event:
 class Competition:
 	def __init__(self,raceId = None,gender = None):
 		if raceId != None:
-                        self.raceId = raceId
-                        self.gender = gender
+			self.raceId = raceId
+			self.gender = gender
 
-                        html = requests.get(f'https://www.fis-ski.com/DB/general/results.html?sectorcode=JP&raceid={raceId}').text
-                        tagCategory = re.search(r'<div class="event-header__subtitle">.+</div>',html).group()
-                        self.category = ExtractContent(tagCategory)
+			html = requests.get(f'https://www.fis-ski.com/DB/general/results.html?sectorcode=JP&raceid={raceId}').text
+			tagCategory = re.search(r'<div class="event-header__subtitle">.+</div>',html).group()
+			self.category = ExtractContent(tagCategory)
+
+			html = html.split('<div data-module="cells-join,list-false-links" class="table table_min_height">')[1]
 			
-                        html = html.split('<div id="events-info-results" class="table__body">')[1]
 			#podatki o rezultatih tekmovalcev
-                        regex = re.findall(r'<div class="g-lg-1 g-md-1 g-sm-1 justify-right hidden-xs pr-1 gray">[0-9]+?</div>',html)
-                        tabBib = list(map(ExtractContent,regex))
-			
-                        regex = re.findall(r'<div class="g-lg-2 g-md-2 g-sm-2 hidden-xs justify-right gray pr-1">[0-9]+?</div>',html)
-                        tabFisCode = list(map(ExtractContent,regex))
-			
-                        regex = re.findall(r'<div class="g-lg g-md g-sm g-xs justify-left bold">[\w\n\s]+</div>',html)
-                        tabNames = list(map(ExtractContent,regex))
-                        tabNames = [name.strip() for name in tabNames] # odstranimo presledke
-			
-                        regex = re.findall(r'<div class="g-lg-1 g-md-1 g-sm-2 g-xs-3 justify-left">[0-9]+?</div>',html)
-                        tabBirthYears = list(map(ExtractContent,regex))
-			
-                        regex = re.findall(r'<span class="country__name-short">.+?</span>',html)
-                        tabCountry = list(map(ExtractContent,regex))
-			
-                        regex = re.findall(r'<div class="g-lg-2 g-md-2 g-sm-3 g-xs-5 justify-right blue bold ">[0-9\.\n\s]+</div>',html)
-                        tabTotalPoints = list(map(ExtractContent,regex))
-                        tabTotalPoints = [totalPoints.strip() for totalPoints in tabTotalPoints] # odstranimo presledke
-			
-                        hasPoints1 = re.search(r'Points 1') != None
-                        hasPoints2 = re.search(r'Points 2') != None
-                        if hasPoints1:
-                                regex = re.findall(r'<div class="g-row justify-right bold">[0-9\.\n\s]+</div>')
-                                tabDistance = list(map(ExtractContent,regex))
-                                tabDistance = [dist.strip() for dist in tabDistance]
-			
-                                regex = re.findall(r'<div class="g-lg-24 justify-right bold">[0-9\.\n\s]+</div>')
-                                tabPoints = list(map(ExtractContent,regex))
-                                tabPoints = [points.strip() for points in tabPoints]
-                                
-                                
-                        self.results = []
-                        for i in range(len(tabNames)):
-                                # ce so tocke tekmovalca zabelezene potem je rezultat veljaven, drugace pa je bil izkljucen, ali pa sploh ni skocil
-                                if len(tabTotalPoints[i]) > 0:
-                                        name = ' '.join(tabNames[i].split()[1:])
-                                        surname = tabNames[i].split()[0]
-                                        if not hasPoints1:
-                                                self.results.append(Result(int(tabBib[i]),int(tabFisCode[i]),name,surname,int(tabBirthYears[i]),tabCountry[i],float(tabTotalPoints[i])))
-                                        elif hasPoits1 and not hasPoints2:
-                                                self.results.append(Result(int(tabBib[i]),int(tabFisCode[i]),name,surname,int(tabBirthYears[i]),tabCountry[i],float(tabTotalPoints[i]),float(tabDistance[i]),float(tabPoints[i])))
-                                        
-                                        else:
-                                                if len(tabDistance2) == 0:
-                                                        self.results.append(Result(int(tabBib[i]),int(tabFisCode[i]),name,surname,int(tabBirthYears[i]),tabCountry[i],float(tabTotalPoints[i]),float(tabDistance[2*i]),float(tabPoints[2*i])))
-                                                else:
-                                                        self.results.append(Result(int(tabBib[i]),int(tabFisCode[i]),name,surname,int(tabBirthYears[i]),tabCountry[i],float(tabTotalPoints[i]),float(tabDistance[2*i]),float(tabPoints[2*i]),float(tabDistance[2*i + 1]),float(tabPoints[2*i + 1])))
-                        
-                else:
-                        self.raceId = None
-                        self.gender = None
-                        self.category = None
-                        self.results = []
+			regex = re.findall(r'<div class="g-lg-1 g-md-1 g-sm-1 justify-right hidden-xs pr-1 gray">[0-9]+?</div>',html)
+			tabBib = list(map(ExtractContent,regex))
+
+			regex = re.findall(r'<div class="g-lg-2 g-md-2 g-sm-2 hidden-xs justify-right gray pr-1">[0-9]+?</div>',html)
+			tabFisCode = list(map(ExtractContent,regex))
+
+			regex = re.findall(r'<div class="g-lg g-md g-sm g-xs justify-left bold">[\w\n\s]+</div>',html)
+			tabNames = list(map(ExtractContent,regex))
+			tabNames = [name.strip() for name in tabNames] # odstranimo presledke
+
+			regex = re.findall(r'<div class="g-lg-1 g-md-1 g-sm-2 g-xs-3 justify-left">[0-9]+?</div>',html)
+			tabBirthYears = list(map(ExtractContent,regex))
+
+			regex = re.findall(r'<span class="country__name-short">.+?</span>',html)
+			tabCountry = list(map(ExtractContent,regex))
+
+			regex = re.findall(r'<div class="g-lg-2 g-md-2 g-sm-3 g-xs-5 justify-right blue bold ">[0-9\.\n\s]+</div>',html)
+			tabTotalPoints = list(map(ExtractContent,regex))
+			tabTotalPoints = [totalPoints.strip() for totalPoints in tabTotalPoints] # odstranimo presledke
+
+			hasPoints1 = re.search(r'Points 1',html) != None
+			hasPoints2 = re.search(r'Points 2',html) != None
+			if hasPoints1:
+				regex = re.findall(r'<div class="g-row justify-right bold">[0-9\.\n\s]+</div>',html)
+				tabDistance = list(map(ExtractContent,regex))
+				tabDistance = [dist.strip() for dist in tabDistance]
+
+				regex = re.findall(r'<div class="g-lg-24 justify-right bold">[0-9\.\n\s]+</div>',html)
+				tabPoints = list(map(ExtractContent,regex))
+				tabPoints = [points.strip() for points in tabPoints]
+								
+								
+			self.results = []
+			for i in range(len(tabNames)):
+				# ce so tocke tekmovalca zabelezene potem je rezultat veljaven, drugace pa je bil izkljucen, ali pa sploh ni skocil
+				if len(tabTotalPoints[i]) > 0:
+					name = ' '.join(tabNames[i].split()[1:])
+					surname = tabNames[i].split()[0]
+					if not hasPoints1:
+						self.results.append(Result(int(tabBib[i]),int(tabFisCode[i]),name,surname,int(tabBirthYears[i]),tabCountry[i],float(tabTotalPoints[i])))
+					elif hasPoints1 and not hasPoints2:
+						self.results.append(Result(int(tabBib[i]),int(tabFisCode[i]),name,surname,int(tabBirthYears[i]),tabCountry[i],float(tabTotalPoints[i]),float(tabDistance[i]),float(tabPoints[i])))
+					else:
+						if len(tabDistance[2*i + 1]) == 0:
+							self.results.append(Result(int(tabBib[i]),int(tabFisCode[i]),name,surname,int(tabBirthYears[i]),tabCountry[i],float(tabTotalPoints[i]),float(tabDistance[2*i]),float(tabPoints[2*i])))
+						else:
+							self.results.append(Result(int(tabBib[i]),int(tabFisCode[i]),name,surname,int(tabBirthYears[i]),tabCountry[i],float(tabTotalPoints[i]),float(tabDistance[2*i]),float(tabPoints[2*i]),float(tabDistance[2*i + 1]),float(tabPoints[2*i + 1])))
+		
+		else:
+			self.raceId = None
+			self.gender = None
+			self.category = None
+			self.results = []
 
 			
 class Result:
@@ -129,8 +129,10 @@ class Result:
 		self.birthYear = birthYear
 		self.country = country
 		self.totalPoints = totalPoints
-		self.res1 = rez1
-		self.res2 = rez2
+		self.distance1 = dist1
+		self.points1 = points1
+		self.distance2 = dist2
+		self.points2 = points2
 
 class Athlete:
 	pass
