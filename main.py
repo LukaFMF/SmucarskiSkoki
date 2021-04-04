@@ -1,17 +1,23 @@
-import tools as t
+import tools as t, time, datetime
 
-# event = t.ReadEvent(45208)
-# print(event.location)
-# print(event.competitions[2].results[40].distance1)
+eventIds = t.GetEventIds(2000,int(datetime.date.today().year))
+# za popravit
+eventIds.remove(11370) # cudne oblike
+eventIds.remove(12302) # imena drzav z malimi crkami
+eventIds.remove(13312) # cudne oblike
+eventIds.remove(24925) # cudne oblike
+eventIds.remove(26510) # imena drzav z malimi crkami
+eventIds.remove(29577) # cudne oblike
+eventIds.sort()
+numEvents = len(eventIds)
 
-eventIds = t.GetEventIds(2000,2021)
+start = time.time()
 events = []
-for eventId in eventIds:
-	print(eventId)
-	events.append(t.ReadEvent(eventId))
+for i in range(numEvents):
+	print(f"\rDownloading eventId {eventIds[i]} ({i+1}/{numEvents})",end = "")
+	events.append(t.ReadEvent(eventIds[i]))
 
-# for eventId in eventIds:
-# 	events.append(t.ReadEvent(eventId))
+print(f"\n{(time.time() - start):.3f} s to load")
 
 # Glavna stran
 # leto = 2021
@@ -21,8 +27,5 @@ for eventId in eventIds:
 # tagsOfEvents = re.findall(r"<a class=\"pr-1 g-lg-1 g-md-1 g-sm-2 hidden-xs justify-left\"  href=\".+?\" target=\"_self\">",html)
 # urlsToEvents = list(map(t.ExtractURL,tagsOfEvents))
 # print(urlsToEvents)
-
-# = re.search(r"https:\/\/.*[0-9]{4}",found)
-
 
 
