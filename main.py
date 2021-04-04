@@ -1,8 +1,8 @@
 import tools as t
 
-event = t.Event(45208)
+event = t.Event(47200)
 print(event.location)
-print(event.competitions[0].results[34].points1)
+print(event.competitions[3].results[34].points1)
 
 # Glavna stran
 # leto = 2021
