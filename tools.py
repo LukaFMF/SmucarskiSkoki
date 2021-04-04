@@ -23,7 +23,7 @@ def ExtractArgumentValueFromURL(url,arg):
 class Event:
 	def __init__(self,eventId = None):
 		if eventId != None:
-			self.eventId = eventId
+			self.eventId = int(eventId)
 			
 			# kraj in drzava s strani
 			html = requests.get(f'https://www.fis-ski.com/DB/general/event-details.html?sectorcode=JP&eventid={eventId}').text
@@ -42,9 +42,21 @@ class Event:
 			for genderTag in tabOfGenderTags:
 				tabGenders.append(ExtractContent(genderTag))
 
+			eventStatusItems = re.findall(r"<span class=\"status__item.+?>",html) # podatki o posameznem dogodku(ce je bil odpovedan, ce so rezultati na voljo)
+
+			possibleCompetitions = []
 			for i in range(len(urlsToComps)):
-				self.competitions.append(Competition(int(ExtractArgumentValueFromURL(urlsToComps[i],"raceid")),tabGenders[i]))
-				time.sleep(.25) # nekaj casa pocakamo, da nas streznik ne blokira
+				print(i)
+				results = True if re.search("Results available",eventStatusItems[4*i]) else False 
+				cancelled = True if re.search("Cancelled",eventStatusItems[4*i + 3]) else False
+				if results and not cancelled: # zagotovimo, da tekmovanje ni bilo odpovedano in da ima #
+					if 
+					possibleCompetitions.append(Competition(int(ExtractArgumentValueFromURL(urlsToComps[i],"raceid")),tabGenders[i]))
+					time.sleep(.25) # nekaj casa pocakamo, da nas streznik ne blokira
+
+			for i in possibleCompetitions:
+				if not possibleCompetitions[i].useless:
+					self.competitions.append(possibleCompetitions[i])
 		else:
 			self.eventId = None
 			self.location = None
@@ -62,56 +74,71 @@ class Competition:
 			tagCategory = re.search(r'<div class="event-header__subtitle">.+</div>',html).group()
 			self.category = ExtractContent(tagCategory)
 
-			html = html.split('<div data-module="cells-join,list-false-links" class="table table_min_height">')[1]
+			splitDocument = html.split('<div data-module="cells-join,list-false-links" class="table table_min_height">')
+			if len(splitDocument) == 2:
+				html = splitDocument[1]
+				self.useless = False
+			else:
+				self.useless = True
 			
 			#podatki o rezultatih tekmovalcev
-			regex = re.findall(r'<div class="g-lg-1 g-md-1 g-sm-1 justify-right hidden-xs pr-1 gray">[0-9]+?</div>',html)
-			tabBib = list(map(ExtractContent,regex))
+			# regex = re.findall(r'<div class="g-lg-1 g-md-1 g-sm-1 justify-right hidden-xs pr-1 gray">[0-9]+?</div>',html)
+			# tabBib = list(map(ExtractContent,regex))
+			if not self.useless:
+				regex = re.findall(r'<div class="g-lg-2 g-md-2 g-sm-2 hidden-xs justify-right gray pr-1">[0-9]+?</div>',html)
+				tabFisCode = list(map(ExtractContent,regex))
 
-			regex = re.findall(r'<div class="g-lg-2 g-md-2 g-sm-2 hidden-xs justify-right gray pr-1">[0-9]+?</div>',html)
-			tabFisCode = list(map(ExtractContent,regex))
+				regex = re.findall(r'<div class="g-lg g-md g-sm g-xs justify-left bold">[\-\w\n\s]+</div>',html)
+				tabNames = list(map(ExtractContent,regex))
+				tabNames = [name.strip() for name in tabNames] # odstranimo presledke
 
-			regex = re.findall(r'<div class="g-lg g-md g-sm g-xs justify-left bold">[\w\n\s]+</div>',html)
-			tabNames = list(map(ExtractContent,regex))
-			tabNames = [name.strip() for name in tabNames] # odstranimo presledke
+				regex = re.findall(r'<div class="g-lg-1 g-md-1 g-sm-2 g-xs-3 justify-left">[0-9]+?</div>',html)
+				tabBirthYears = list(map(ExtractContent,regex))
 
-			regex = re.findall(r'<div class="g-lg-1 g-md-1 g-sm-2 g-xs-3 justify-left">[0-9]+?</div>',html)
-			tabBirthYears = list(map(ExtractContent,regex))
+				regex = re.findall(r'<span class="country__name-short">.+?</span>',html)
+				tabCountry = list(map(ExtractContent,regex))
 
-			regex = re.findall(r'<span class="country__name-short">.+?</span>',html)
-			tabCountry = list(map(ExtractContent,regex))
+				regex = re.findall(r'<div class="g-lg-2 g-md-2 g-sm-3 g-xs-5 justify-right blue bold ">[\-0-9\.\n\s]+</div>',html)
+				tabTotalPoints = list(map(ExtractContent,regex))
+				tabTotalPoints = [totalPoints.strip() for totalPoints in tabTotalPoints] # odstranimo presledke
 
-			regex = re.findall(r'<div class="g-lg-2 g-md-2 g-sm-3 g-xs-5 justify-right blue bold ">[0-9\.\n\s]+</div>',html)
-			tabTotalPoints = list(map(ExtractContent,regex))
-			tabTotalPoints = [totalPoints.strip() for totalPoints in tabTotalPoints] # odstranimo presledke
+				hasPoints1 = re.search(r'Points 1',html) != None
+				hasPoints2 = re.search(r'Points 2',html) != None
+				if hasPoints1:
+					regex = re.findall(r'<div class="g-row justify-right bold">[0-9\.\n\s]+</div>',html)
+					tabDistance = list(map(ExtractContent,regex))
+					tabDistance = [dist.strip() for dist in tabDistance]
 
-			hasPoints1 = re.search(r'Points 1',html) != None
-			hasPoints2 = re.search(r'Points 2',html) != None
-			if hasPoints1:
-				regex = re.findall(r'<div class="g-row justify-right bold">[0-9\.\n\s]+</div>',html)
-				tabDistance = list(map(ExtractContent,regex))
-				tabDistance = [dist.strip() for dist in tabDistance]
-
-				regex = re.findall(r'<div class="g-lg-24 justify-right bold">[0-9\.\n\s]+</div>',html)
-				tabPoints = list(map(ExtractContent,regex))
-				tabPoints = [points.strip() for points in tabPoints]
-								
-								
-			self.results = []
-			for i in range(len(tabNames)):
-				# ce so tocke tekmovalca zabelezene potem je rezultat veljaven, drugace pa je bil izkljucen, ali pa sploh ni skocil
-				if len(tabTotalPoints[i]) > 0:
-					name = ' '.join(tabNames[i].split()[1:])
-					surname = tabNames[i].split()[0]
-					if not hasPoints1:
-						self.results.append(Result(int(tabBib[i]),int(tabFisCode[i]),name,surname,int(tabBirthYears[i]),tabCountry[i],float(tabTotalPoints[i])))
-					elif hasPoints1 and not hasPoints2:
-						self.results.append(Result(int(tabBib[i]),int(tabFisCode[i]),name,surname,int(tabBirthYears[i]),tabCountry[i],float(tabTotalPoints[i]),float(tabDistance[i]),float(tabPoints[i])))
-					else:
-						if len(tabDistance[2*i + 1]) == 0:
-							self.results.append(Result(int(tabBib[i]),int(tabFisCode[i]),name,surname,int(tabBirthYears[i]),tabCountry[i],float(tabTotalPoints[i]),float(tabDistance[2*i]),float(tabPoints[2*i])))
-						else:
-							self.results.append(Result(int(tabBib[i]),int(tabFisCode[i]),name,surname,int(tabBirthYears[i]),tabCountry[i],float(tabTotalPoints[i]),float(tabDistance[2*i]),float(tabPoints[2*i]),float(tabDistance[2*i + 1]),float(tabPoints[2*i + 1])))
+					regex = re.findall(r'<div class="g-lg-24 justify-right bold">[0-9\.\n\s]+</div>',html)
+					tabPoints = list(map(ExtractContent,regex))
+					tabPoints = [points.strip() for points in tabPoints]
+									
+				if float(tabTotalPoints[0])	== 0.0:
+					self.useless = True
+				else:
+					self.results = []
+					for i in range(len(tabNames)):
+						print(i)
+						# ce so tocke tekmovalca zabelezene potem je rezultat veljaven, drugace pa je bil izkljucen, ali pa sploh ni skocil
+						print(tabTotalPoints[i])
+						if len(tabTotalPoints[i]) > 0:
+							print(tabNames[i])
+							name = ' '.join(tabNames[i].split()[1:])
+							surname = tabNames[i].split()[0]
+							if hasPoints2:
+								if len(tabPoints[2*i]) > 0 and len(tabPoints[2*i + 1]) > 0:
+									self.results.append(Result(int(tabFisCode[i]),name,surname,int(tabBirthYears[i]),tabCountry[i],float(tabTotalPoints[i]),float(tabDistance[2*i]),float(tabPoints[2*i]),float(tabDistance[2*i + 1]),float(tabPoints[2*i + 1])))
+								elif len(tabPoints[2*i]) > 0:
+									self.results.append(Result(int(tabFisCode[i]),name,surname,int(tabBirthYears[i]),tabCountry[i],float(tabTotalPoints[i]),float(tabDistance[2*i]),float(tabPoints[2*i])))
+								else:
+									self.results.append(Result(int(tabFisCode[i]),name,surname,int(tabBirthYears[i]),tabCountry[i],float(tabTotalPoints[i])))
+							elif hasPoints1:
+								if len(tabPoints[i]) > 0:
+									self.results.append(Result(int(tabFisCode[i]),name,surname,int(tabBirthYears[i]),tabCountry[i],float(tabTotalPoints[i]),float(tabDistance[i]),float(tabPoints[i])))
+								else:
+									self.results.append(Result(int(tabFisCode[i]),name,surname,int(tabBirthYears[i]),tabCountry[i],float(tabTotalPoints[i])))
+							else:
+								self.results.append(Result(int(tabFisCode[i]),name,surname,int(tabBirthYears[i]),tabCountry[i],float(tabTotalPoints[i])))
 		
 		else:
 			self.raceId = None
@@ -121,8 +148,7 @@ class Competition:
 
 			
 class Result:
-	def __init__(self,bib,fiscode,name,surname,birthYear,country,totalPoints,dist1 = None,points1 = None,dist2 = None,points2 = None):
-		self.bib = bib
+	def __init__(self,fiscode,name,surname,birthYear,country,totalPoints,dist1 = None,points1 = None,dist2 = None,points2 = None):
 		self.fisCode = fiscode
 		self.name = name
 		self.surname = surname
@@ -217,13 +243,27 @@ def WriteEventToFile(event):
 		# koliko rezultatov sledi
 		thingsToWrite.append(s.pack("I",len(competition.results)))
 		for result in competition.results:
-			thingsToWrite.append(s.pack("I",result.bib))
 			thingsToWrite.append(s.pack("I",result.fisCode))
 			thingsToWrite.extend(PackStrToBytes(result.name))
 			thingsToWrite.extend(PackStrToBytes(result.surname))
 			thingsToWrite.append(s.pack("I",result.birthYear))
 			thingsToWrite.extend(PackStrToBytes(result.country))
 			thingsToWrite.append(s.pack("f",result.totalPoints))
+
+			# povemo ali ima rezultat tudi dolzino skoka in tocke prve in druge serije
+			flagByte = 0
+			if result.points1 != None:
+				flagByte |= 1
+			if result.points2 != None:
+				flagByte |= 2
+			thingsToWrite.append(s.pack("c",flagByte.to_bytes(1,byteorder = "little")))
+
+			if flagByte & 1:
+				thingsToWrite.append(s.pack("f",result.distance1))
+				thingsToWrite.append(s.pack("f",result.points1))
+			if flagByte & 2:
+				thingsToWrite.append(s.pack("f",result.distance2))
+				thingsToWrite.append(s.pack("f",result.points2))
 
 	dat = open(os.path.join("data",f"{event.eventId}.bin"),"wb")
 	for dataInBytes in thingsToWrite:
@@ -271,8 +311,6 @@ def ReadEvent(eventId):
 			numResults = s.unpack("I",data[offset:offset+4])[0]
 			offset += 4
 			for _ in range(numResults):
-				bib = s.unpack("I",data[offset:offset+4])[0]
-				offset += 4
 				fisCode = s.unpack("I",data[offset:offset+4])[0]
 				offset += 4
 				name,offset = UnpackStrFromBytes(data,offset)
@@ -283,7 +321,25 @@ def ReadEvent(eventId):
 				totalPoints = s.unpack("f",data[offset:offset+4])[0]
 				offset += 4
 
-				competition.results.append(Result(bib,fisCode,name,surname,birthYear,country,totalPoints))
+				flagByte = int.from_bytes(s.unpack("c",data[offset:offset+1])[0],byteorder = "little")
+				offset += 1
+
+				distance1 = None
+				points1 = None
+				distance2 = None
+				points2 = None
+				if flagByte & 1:
+					distance1 = s.unpack("f",data[offset:offset+4])[0]
+					offset += 4
+					points1 = s.unpack("f",data[offset:offset+4])[0]
+					offset += 4
+				if flagByte & 2:
+					distance2 = s.unpack("f",data[offset:offset+4])[0]
+					offset += 4
+					points2 = s.unpack("f",data[offset:offset+4])[0]
+					offset += 4
+
+				competition.results.append(Result(fisCode,name,surname,birthYear,country,totalPoints,distance1,points1,distance2,points2))
 
 			event.competitions.append(competition)
 
@@ -291,5 +347,29 @@ def ReadEvent(eventId):
 	else:
 		event = Event(eventId)
 		# dogodek shranimo, da ob naslednjem zagonu programa ni treba spet dostopati do spletne strani
-		WriteToFile(event) 
+		WriteEventToFile(event)
 		return event
+
+def GetEventIds(start,end):
+	''' Pridobi id stevilke dogodkov od leta start do leta end(vkljucno) in jih vrne kot seznam '''
+
+	eventIds = []
+	for year in range(start,end + 1):
+		html = requests.get(f"https://www.fis-ski.com/DB/ski-jumping/calendar-results.html?eventselection=results&place=&sectorcode=JP&seasoncode={year}&categorycode=&disciplinecode=NH,LH,FH&gendercode=&racedate=&racecodex=&nationcode=&seasonmonth=X-{year}&saveselection=-1&seasonselection=").text
+
+		tagsWithLinksToEvents = re.findall(r"<a class=\"pr-1 g-lg-1 g-md-1 g-sm-2 hidden-xs justify-left\"  href=\"http.+?\" target=\"_self\">",html)
+		eventStatusItems = re.findall(r"<span class=\"status__item.+?>",html) # podatki o posameznem dogodku(ce je bil odpovedan, ce so rezultati na voljo)
+
+		for i in range(len(tagsWithLinksToEvents)):
+			results = True if re.search("Results available",eventStatusItems[4*i]) else False 
+			cancelled = True if re.search("Cancelled",eventStatusItems[4*i + 3]) else False
+
+			if results and not cancelled: # dogodek lahko obravnavamo le, ce ni bil odpovedan in so na voljo rezultati
+				linkToEvent = ExtractURL(tagsWithLinksToEvents[i])
+				eventId = ExtractArgumentValueFromURL(linkToEvent,"eventid")
+
+				eventIds.append(eventId)
+
+		time.sleep(.25) # nekaj casa pocakamo, da nas streznik ne blokira
+
+	return eventIds

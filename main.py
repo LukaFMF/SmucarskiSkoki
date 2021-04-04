@@ -1,8 +1,17 @@
 import tools as t
 
-event = t.Event(45208)
-print(event.location)
-print(event.competitions[0].results[34].points1)
+# event = t.ReadEvent(45208)
+# print(event.location)
+# print(event.competitions[2].results[40].distance1)
+
+eventIds = t.GetEventIds(2000,2021)
+events = []
+for eventId in eventIds:
+	print(eventId)
+	events.append(t.ReadEvent(eventId))
+
+# for eventId in eventIds:
+# 	events.append(t.ReadEvent(eventId))
 
 # Glavna stran
 # leto = 2021
