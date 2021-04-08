@@ -294,7 +294,8 @@ class Result:
 			ret += f"\tSeries1: {self.distance1:.1f} m - {self.points1:.1f}\n"
 		if self.points2 != None:
 			ret += f"\tSeries2: {self.distance2:.1f} m - {self.points2:.1f}\n"
-		ret += f"\tTotal points: {self.totalPoints:.1f}\n"
+		if self.totalPoints != None:	
+			ret += f"\tTotal points: {self.totalPoints:.1f}\n"
 		return ret
 
 
@@ -410,6 +411,7 @@ class TeamResult:#po posamezni državi
 		self.countryFisCode = countryFisCode
 		self.totalPoints = totalPoints
 		self.results = c.deepcopy(tabResultsOfCompetitors)
+
 
 def PackStrToBytes(string):
 	''' Vrne par, ki vsebuje zakodirano dolznino niza in niz sam '''
@@ -688,3 +690,19 @@ def GetEventIds(start,end):
 		time.sleep(.25) # nekaj casa pocakamo, da nas streznik ne blokira
 
 	return list(map(int,eventIds))
+
+
+def ToOrdinalStr(number):
+	lastDigit = number % 10
+
+	if 11 <= number <= 13:
+		return f"{number}th"
+	
+	if lastDigit == 1:
+		return f"{number}st"
+	elif lastDigit == 2:
+		return f"{number}nd"
+	elif lastDigit == 3:
+		return f"{number}rd"
+	return f"{number}th"
+		
