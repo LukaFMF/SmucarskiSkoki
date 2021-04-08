@@ -1,4 +1,4 @@
-import tools as t, time, datetime
+import tools as t, time, datetime, obdelava_podatkov as op
 
 eventIds = t.GetEventIds(2000,int(datetime.date.today().year))
 # za popravit
@@ -18,6 +18,11 @@ for i in range(numEvents):
 	events.append(t.ReadEvent(eventIds[i]))
 
 print(f"\n{(time.time() - start):.3f} s to load")
+
+
+# athletes,fisCodeMap = op.athleteResults(events)
+
+# print(athletes[fisCodeMap[6392]])
 
 # Glavna stran
 # leto = 2021

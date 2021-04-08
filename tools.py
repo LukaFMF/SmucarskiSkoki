@@ -1,4 +1,4 @@
-import re, requests, os, struct as s, time
+import re, requests, os, struct as s, time, copy as c
 
 def ExtractURL(tag):
 	''' Iz niza, ki vsebuje HTML znacko z URL naslovom izlusci ta URL '''
@@ -20,6 +20,111 @@ def ExtractArgumentValueFromURL(url,arg):
 	else:
 		raise Exception(f"URL \"{url}\" does not contain argument \"{arg}\"!")
 
+class DateException(Exception):
+	def __init__(self,year,month,day):
+		super().__init__(f"Date {year}-{month}-{day} is not valid!")
+
+class Date:
+	def __init__(self,year,month,day):
+		if (not isinstance(year,int) or not isinstance(month,int) or not isinstance(day,int) or 
+			year < 1950 or month < 1 or month > 12 or day < 1 or day > Date.DaysInMonth(month,year)):
+			raise DateException(year,month,day)
+			
+		self.year = year
+		self.month = month
+		self.day = day
+
+	def __str__(self):
+		return f"{self.year}-{self.month}-{self.day}"
+
+	def __repr__(self):
+		return f"{self.__class__.__name__}({self.year},{self.month},{self.day})"
+
+	def ToBytes(self):
+		return s.pack("3I",self.year,self.month,self.day)
+
+	@staticmethod
+	def FromStr(string):
+		# <span class="date__short">Mar 24, 2021</span>
+		monthMap = {
+			"Jan": 1,
+			"Feb": 2,
+			"Mar": 3,
+			"Apr": 4,
+			"May": 5,
+			"Jun": 6,
+			"Jul": 7,
+			"Aug": 8,
+			"Sep": 9,
+			"Oct": 10,
+			"Nov": 11,
+			"Dec": 12
+		}
+		spl = string.split(" ")
+		return Date(int(spl[2]),monthMap[spl[0]],int(spl[1][:-1]))
+
+	@staticmethod
+	def FromBytes(dataInBytes):
+		year,month,day = s.unpack("3I",dataInBytes)
+
+		return Date(year,month,day)
+
+	@staticmethod
+	def IsLeapYear(year):
+		if year % 4 != 0:
+			return False
+		elif year % 100 != 0:
+			return True
+		elif year % 400 != 0:
+			return False
+		return True
+
+	@staticmethod
+	def DaysInMonth(month,year):
+		if month <= 7:
+			if month == 2:
+				return 29 if Date.IsLeapYear(year) else 28
+			return 30 if month % 2 == 0 else 31
+		return 31 if month % 2 == 0 else 30
+
+def HillHeightClass(height):
+	if height < 85:
+		return "XX"
+	elif height < 110:
+		return "NH"
+	elif height < 185:
+		return "LH"
+	return "FH"
+
+def HillCategory(string):
+	if string.startswith("Team"):
+		string = string.split(" ")[1]
+	
+	if string[0] == "K":
+		kRating = int(string[1:])
+		if kRating < 75:
+			hsRating = kRating
+		if kRating < 100:
+			hsRating = round(kRating + 10)
+		elif kRating < 170:
+			hsRating = round(110 + (kRating - 100) * 74/69)
+		else:
+			hsRating = round(185 + (kRating - 170) * 55/30)
+		return (HillHeightClass(hsRating),hsRating)
+	elif string[:2] == "HS":
+		hsRating = int(string[2:])
+		return (HillHeightClass(hsRating),hsRating)
+	else:
+		if string.startswith("Normal"):
+			return ("NH",None)
+		elif string.startswith("Large"):
+			return ("LH",None)
+		elif string.startswith("Flying"):
+			return ("FH",None)
+		raise Exception("Invalid hill!")
+
+
+
 class Event:
 	def __init__(self,eventId = None):
 		if eventId != None:
@@ -39,8 +144,10 @@ class Event:
 			urlsToComps = list(map(ExtractURL,tagsOfComps))
 
 			regex = re.findall(r'<div class="g-xs-24 justify-left"><div class="clip">[\w\n\s\.]+?</div>',html)
-			tabKindsOfComps = list(map(ExtractContent,regex)) #dobimo tabelo oznak tekmovanj npr. 'HS240' ali 'Team HS 140'
-			tabKindsOfComps = [' '.join(el.split()) for el in tabKindsOfComps]
+			tabKindsOfComps = list(map(ExtractContent,regex)) # dobimo tabelo oznak tekmovanj npr. 'HS240' ali 'Team HS140'
+			tabKindsOfComps = [tabKindsOfComps[i].strip() for i in range(len(tabKindsOfComps)) if i % 2 == 0]
+
+			tabHillHeights = list(map(HillCategory,tabKindsOfComps))
 
 			tabOfGenderTags = re.findall('<div class="gender__item gender__item_\w">\w</div>',html)
 			for genderTag in tabOfGenderTags:
@@ -53,10 +160,10 @@ class Event:
 				results = True if re.search("Results available",eventStatusItems[4*i]) else False 
 				cancelled = True if re.search("Cancelled",eventStatusItems[4*i + 3]) else False
 				if results and not cancelled: # zagotovimo, da tekmovanje ni bilo odpovedano in da ima #
-					if 'Team' in tabKindsOfComps[i*2]: #ni ekipna tekma
-						possibleCompetitions.append(TeamCompetition(int(ExtractArgumentValueFromURL(urlsToComps[i],"raceid")),tabGenders[i]))
-					else: #je ekipna tekma
-						possibleCompetitions.append(Competition(int(ExtractArgumentValueFromURL(urlsToComps[i],"raceid")),tabGenders[i]))
+					if tabKindsOfComps[i].startswith('Team'): # je ekipna tekma
+						possibleCompetitions.append(TeamCompetition(int(ExtractArgumentValueFromURL(urlsToComps[i],"raceid")),tabGenders[i],tabHillHeights[i]))
+					else: # ni ekipna tekma
+						possibleCompetitions.append(Competition(int(ExtractArgumentValueFromURL(urlsToComps[i],"raceid")),tabGenders[i],tabHillHeights[i]))
 					time.sleep(.25) # nekaj casa pocakamo, da nas streznik ne blokira
 
 			for i in range(len(possibleCompetitions)):
@@ -70,10 +177,11 @@ class Event:
 
 		
 class Competition:
-	def __init__(self,raceId = None,gender = None):
+	def __init__(self,raceId = None,gender = None,hillSize = None):
 		if raceId != None:
 			self.raceId = raceId
 			self.gender = gender
+			self.hillSizeName,self.hillSizeHeight = hillSize
 
 			html = requests.get(f'https://www.fis-ski.com/DB/general/results.html?sectorcode=JP&raceid={raceId}').text
 			tagCategory = re.search(r'<div class="event-header__subtitle">.+?</div>',html).group()
@@ -90,6 +198,12 @@ class Competition:
 			# regex = re.findall(r'<div class="g-lg-1 g-md-1 g-sm-1 justify-right hidden-xs pr-1 gray">[0-9]+?</div>',html)
 			# tabBib = list(map(ExtractContent,regex))
 			if not self.useless:
+				res = re.search(r"<span class=\"date__short\">[0-9\w\s\,]+?</span>",splitDocument[0])
+				if res:
+					self.date = Date.FromStr(ExtractContent(res.group()))
+				else:
+					self.date = None
+
 				regex = re.findall(r'<div class="g-lg-2 g-md-2 g-sm-2 hidden-xs justify-right gray pr-1">[0-9]+?</div>',html)
 				tabFisCode = list(map(ExtractContent,regex))
 
@@ -154,7 +268,10 @@ class Competition:
 		else:
 			self.raceId = None
 			self.gender = None
+			self.hillSizeName = None
+			self.hillSizeHeight = None
 			self.category = None
+			self.date = None
 			self.results = []
 
 			
@@ -171,11 +288,22 @@ class Result:
 		self.distance2 = dist2
 		self.points2 = points2
 
+	def __str__(self):
+		ret = ""
+		if self.points1 != None: 
+			ret += f"\tSeries1: {self.distance1:.1f} m - {self.points1:.1f}\n"
+		if self.points2 != None:
+			ret += f"\tSeries2: {self.distance2:.1f} m - {self.points2:.1f}\n"
+		ret += f"\tTotal points: {self.totalPoints:.1f}\n"
+		return ret
+
+
 class TeamCompetition:
-	def __init__(self,raceId = None, gender = None):
+	def __init__(self,raceId = None, gender = None,hillSize = None):
 		if raceId != None:
 			self.raceId = raceId
 			self.gender = gender
+			self.hillSizeName,self.hillSizeHeight = hillSize
 			self.useless = False
 			
 			html = requests.get(f'https://www.fis-ski.com/DB/general/results.html?sectorcode=JP&raceid={raceId}').text
@@ -190,6 +318,13 @@ class TeamCompetition:
 				self.useless = True
 			
 			if not self.useless:
+				# datum
+				res = re.search(r"<span class=\"date__short\">[0-9\w\s\,]+?</span>",splitDocument[0])
+				if res:
+					self.date = Date.FromStr(ExtractContent(res.group()))
+				else:
+					self.date = None
+
 				#podatki o rezultatih ekip
 				regex = re.findall(r'<div class="g-lg-9 g-md-9 g-sm-5 g-xs-11 justify-left bold">[\w\n\s\-]+</div>',html) 
 				tabCountryAndNames = list(map(ExtractContent,regex)) #dobimo tako imena držav, kot vseh tekmovalcev
@@ -203,7 +338,7 @@ class TeamCompetition:
 				
 				tabResultsOfCompetitors = []
 				
-				tabNames =[]
+				tabNames = []
 				tabCountry = []
 				country = None
 				
@@ -256,73 +391,25 @@ class TeamCompetition:
 			
 			if not self.useless:
 				self.results = []
-				NamesPerTeam = int(len(tabNames)/len(tabCountry))#število članov v posamezni ekipi
+				namesPerTeam = int(len(tabNames)/len(tabCountry))#število članov v posamezni ekipi
 				for i in range(len(tabCountry)):
-					self.results.append(teamResult(tabCountry[i][0],int(tabCountry[i][1]),float(tabTotalPoints[i]),tabResultsOfCompetitors[i*NamesPerTeam:(i+1)*NamesPerTeam]))
+					self.results.append(TeamResult(tabCountry[i][0],int(tabCountry[i][1]),float(tabTotalPoints[i]),tabResultsOfCompetitors[i*namesPerTeam:(i+1)*namesPerTeam]))
 				
 		else:
 			self.raceId = None
 			self.gender = None
+			self.hillSizeName = None
+			self.hillSizeHeight = None
 			self.category = None
+			self.date = None
 			self.results = []
 
-class teamResult:#po posamezni državi
-	def __init__(self,country,countryFisCode,TotalPoints,tabResultsOfCompetitors):
+class TeamResult:#po posamezni državi
+	def __init__(self,country = None,countryFisCode = None,totalPoints = None,tabResultsOfCompetitors = []):
 		self.country = country
 		self.countryFisCode = countryFisCode
-		self.totalPoints = TotalPoints
-		self.results = tabResultsOfCompetitors[:]
-		
-class Athlete:
-	pass
-
-
-class DateException(Exception):
-	def __init__(self,year,month,day):
-		super().__init__(f"Date {year}-{month}-{day} is not a valid!")
-
-class Date:
-	def __init__(self,year,month,day):
-		if (not isinstance(year,int) or not isinstance(month,int) or not isinstance(day,int) or 
-			year < 1950 or month < 1 or month > 12 or day < 1 or day < Date.DaysInMonth(month,year)):
-			raise DateException(year,month,day)
-			
-		self.year = year
-		self.month = month
-		self.day = day
-
-	def __str__(self):
-		return f"{self.year}-{self.month}-{self.day}"
-
-	def __repr__(self):
-		return f"{self.__class__.__name__}({self.year},{self.month},{self.day})"
-
-	def ToBytes(self):
-		return s.pack("3I",self.year,self.month,self.day)
-
-	@staticmethod
-	def FromBytes(dataInBytes):
-		year,month,day = s.unpack("3I",dataInBytes)
-
-		return Date(year,month,day)
-
-	@staticmethod
-	def IsLeapYear(year):
-		if year % 4 != 0:
-			return False
-		elif year % 100 != 0:
-			return True
-		elif year % 400 != 0:
-			return False
-		return True
-
-	@staticmethod
-	def DaysInMonth(month,year):
-		if month <= 7:
-			if month == 2:
-				return 29 if IsLeapYear(year) else 28
-			return 30 if month % 2 == 0 else 31
-		return 31 if month % 2 == 0 else 30
+		self.totalPoints = totalPoints
+		self.results = c.deepcopy(tabResultsOfCompetitors)
 
 def PackStrToBytes(string):
 	''' Vrne par, ki vsebuje zakodirano dolznino niza in niz sam '''
@@ -338,26 +425,20 @@ def WriteEventToFile(event):
 	thingsToWrite.extend(PackStrToBytes(event.location))
 	thingsToWrite.extend(PackStrToBytes(event.country))
 
-	# signaliziramo ali sledi tudi datum, ki nam pove konec dogodka
-	# writeEndDate = event.endDate != None
-	# thingsToWrite.append(s.pack("?",writeEndDate))
-
-	# thingsToWrite.append(event.startDate.ToBytes())
-	# if writeEndDate:
-	# 	thingsToWrite.append(evenendDate.ToBytes())
-
 	# koliko tekmovanj sledi
-	lengthComps = 0 
+	thingsToWrite.append(s.pack("I",len(event.competitions)))
 	for competition in event.competitions:
 		if isinstance(competition,Competition):
-			lengthComps += 1
-	#thingsToWrite.append(s.pack("I",len(event.competitions)))
-	thingsToWrite.append(s.pack("I",lengthComps))
-	for competition in event.competitions:
-		if isinstance(competition,Competition):
+			thingsToWrite.append(s.pack("?",True)) # povemo da je to navaden Competition, in ne TeamCompetition
 			thingsToWrite.append(s.pack("I",competition.raceId))
 			thingsToWrite.append(s.pack("c",bytes(competition.gender,encoding = "utf8")))
+			thingsToWrite.extend(PackStrToBytes(competition.hillSizeName))
+			if competition.hillSizeHeight == None:
+				thingsToWrite.append(s.pack("I",0))
+			else:
+				thingsToWrite.append(s.pack("I",competition.hillSizeHeight))
 			thingsToWrite.extend(PackStrToBytes(competition.category))
+			thingsToWrite.append(competition.date.ToBytes())
 			
 			# koliko rezultatov sledi
 			thingsToWrite.append(s.pack("I",len(competition.results)))
@@ -383,6 +464,47 @@ def WriteEventToFile(event):
 				if flagByte & 2:
 					thingsToWrite.append(s.pack("f",result.distance2))
 					thingsToWrite.append(s.pack("f",result.points2))
+		else: # TeamCompetition
+			thingsToWrite.append(s.pack("?",False)) # povemo da je to TeamCompetition
+
+			thingsToWrite.append(s.pack("I",competition.raceId))
+			thingsToWrite.append(s.pack("c",bytes(competition.gender,encoding = "utf8")))
+			thingsToWrite.extend(PackStrToBytes(competition.hillSizeName))
+			if competition.hillSizeHeight == None:
+				thingsToWrite.append(s.pack("I",0))
+			else:
+				thingsToWrite.append(s.pack("I",competition.hillSizeHeight))
+			thingsToWrite.extend(PackStrToBytes(competition.category))
+			thingsToWrite.append(competition.date.ToBytes())
+
+			thingsToWrite.append(s.pack("I",len(competition.results)))
+			for teamResult in competition.results:
+				thingsToWrite.extend(PackStrToBytes(teamResult.country))
+				thingsToWrite.append(s.pack("I",teamResult.countryFisCode))
+				thingsToWrite.append(s.pack("f",teamResult.totalPoints))
+
+				thingsToWrite.append(s.pack("I",len(teamResult.results)))
+				for individualResult in teamResult.results:
+					thingsToWrite.append(s.pack("I",individualResult.fisCode))
+					thingsToWrite.extend(PackStrToBytes(individualResult.name))
+					thingsToWrite.extend(PackStrToBytes(individualResult.surname))
+					thingsToWrite.append(s.pack("I",individualResult.birthYear if individualResult.birthYear != None else 0))
+					thingsToWrite.extend(PackStrToBytes(individualResult.country))
+
+					# povemo ali ima rezultat tudi dolzino skoka in tocke prve in druge serije
+					flagByte = 0
+					if individualResult.points1 != None:
+						flagByte |= 1
+					if individualResult.points2 != None:
+						flagByte |= 2
+					thingsToWrite.append(s.pack("c",flagByte.to_bytes(1,byteorder = "little")))
+
+					if flagByte & 1:
+						thingsToWrite.append(s.pack("f",individualResult.distance1))
+						thingsToWrite.append(s.pack("f",individualResult.points1))
+					if flagByte & 2:
+						thingsToWrite.append(s.pack("f",individualResult.distance2))
+						thingsToWrite.append(s.pack("f",individualResult.points2))
 
 	dat = open(os.path.join("data",f"{event.eventId}.bin"),"wb")
 	for dataInBytes in thingsToWrite:
@@ -419,48 +541,122 @@ def ReadEvent(eventId):
 		numRaces = s.unpack("I",data[offset:offset+4])[0]
 		offset += 4
 		for _ in range(numRaces):
-			competition = Competition()
-			competition.raceId = s.unpack("I",data[offset:offset+4])[0]
-			offset += 4
-			competition.gender = s.unpack("c",data[offset:offset+1])[0].decode()
+			isNormalCompetition = s.unpack("?",data[offset:offset+1])[0]
 			offset += 1
-			event.category,offset = UnpackStrFromBytes(data,offset)
-
-			# stevilo rezultatov pri tekmovanju
-			numResults = s.unpack("I",data[offset:offset+4])[0]
-			offset += 4
-			for _ in range(numResults):
-				fisCode = s.unpack("I",data[offset:offset+4])[0]
+			if isNormalCompetition:
+				competition = Competition()
+				competition.raceId = s.unpack("I",data[offset:offset+4])[0]
 				offset += 4
-				name,offset = UnpackStrFromBytes(data,offset)
-				surname,offset = UnpackStrFromBytes(data,offset)
-				birthYear = None if s.unpack("I",data[offset:offset+4])[0] == 0 else s.unpack("I",data[offset:offset+4])[0]
-				offset += 4
-				country,offset = UnpackStrFromBytes(data,offset)
-				totalPoints = s.unpack("f",data[offset:offset+4])[0]
-				offset += 4
-
-				flagByte = int.from_bytes(s.unpack("c",data[offset:offset+1])[0],byteorder = "little")
+				competition.gender = s.unpack("c",data[offset:offset+1])[0].decode()
 				offset += 1
+				competition.hillSizeName,offset = UnpackStrFromBytes(data,offset)
+				hillSizeHeight = s.unpack("I",data[offset:offset+4])[0]
+				offset += 4
+				if hillSizeHeight == 0:
+					competition.hillSizeHeight = None
+				else:
+					competition.hillSizeHeight = hillSizeHeight
+				competition.category,offset = UnpackStrFromBytes(data,offset)
+				competition.date = Date.FromBytes(data[offset:offset+12])
+				offset += 12
 
-				distance1 = None
-				points1 = None
-				distance2 = None
-				points2 = None
-				if flagByte & 1:
-					distance1 = s.unpack("f",data[offset:offset+4])[0]
+				# stevilo rezultatov pri posameznem tekmovanju
+				numResults = s.unpack("I",data[offset:offset+4])[0]
+				offset += 4
+				for _ in range(numResults):
+					fisCode = s.unpack("I",data[offset:offset+4])[0]
 					offset += 4
-					points1 = s.unpack("f",data[offset:offset+4])[0]
+					name,offset = UnpackStrFromBytes(data,offset)
+					surname,offset = UnpackStrFromBytes(data,offset)
+					birthYear = None if s.unpack("I",data[offset:offset+4])[0] == 0 else s.unpack("I",data[offset:offset+4])[0]
 					offset += 4
-				if flagByte & 2:
-					distance2 = s.unpack("f",data[offset:offset+4])[0]
-					offset += 4
-					points2 = s.unpack("f",data[offset:offset+4])[0]
+					country,offset = UnpackStrFromBytes(data,offset)
+					totalPoints = s.unpack("f",data[offset:offset+4])[0]
 					offset += 4
 
-				competition.results.append(Result(fisCode,name,surname,birthYear,country,totalPoints,distance1,points1,distance2,points2))
+					flagByte = int.from_bytes(s.unpack("c",data[offset:offset+1])[0],byteorder = "little")
+					offset += 1
 
-			event.competitions.append(competition)
+					distance1 = None
+					points1 = None
+					distance2 = None
+					points2 = None
+					if flagByte & 1:
+						distance1 = s.unpack("f",data[offset:offset+4])[0]
+						offset += 4
+						points1 = s.unpack("f",data[offset:offset+4])[0]
+						offset += 4
+					if flagByte & 2:
+						distance2 = s.unpack("f",data[offset:offset+4])[0]
+						offset += 4
+						points2 = s.unpack("f",data[offset:offset+4])[0]
+						offset += 4
+
+					competition.results.append(Result(fisCode,name,surname,birthYear,country,totalPoints,distance1,points1,distance2,points2))
+
+				event.competitions.append(competition)
+			else:
+				teamCompetition = TeamCompetition()
+				teamCompetition.raceId = s.unpack("I",data[offset:offset+4])[0]
+				offset += 4
+				teamCompetition.gender = s.unpack("c",data[offset:offset+1])[0].decode()
+				offset += 1
+				teamCompetition.hillSizeName,offset = UnpackStrFromBytes(data,offset)
+				hillSizeHeight = s.unpack("I",data[offset:offset+4])[0]
+				offset += 4
+				if hillSizeHeight == 0:
+					teamCompetition.hillSizeHeight = None
+				else:
+					teamCompetition.hillSizeHeight = hillSizeHeight
+				teamCompetition.category,offset = UnpackStrFromBytes(data,offset)
+				teamCompetition.date = Date.FromBytes(data[offset:offset+12])
+				offset += 12
+
+				numTeamResults = s.unpack("I",data[offset:offset+4])[0]
+				offset += 4
+				for _ in range(numTeamResults):
+					teamResult = TeamResult()
+
+					teamResult.country,offset = UnpackStrFromBytes(data,offset)
+					teamResult.countryFisCode = s.unpack("I",data[offset:offset+4])[0]
+					offset += 4
+					teamResult.totalPoints = s.unpack("f",data[offset:offset+4])[0]
+					offset += 4
+
+					numIndividualResults = s.unpack("I",data[offset:offset+4])[0]
+					offset += 4
+					for _ in range(numIndividualResults):
+						fisCode = s.unpack("I",data[offset:offset+4])[0]
+						offset += 4
+						name,offset = UnpackStrFromBytes(data,offset)
+						surname,offset = UnpackStrFromBytes(data,offset)
+						birthYear = None if s.unpack("I",data[offset:offset+4])[0] == 0 else s.unpack("I",data[offset:offset+4])[0]
+						offset += 4
+						country,offset = UnpackStrFromBytes(data,offset)
+
+						flagByte = int.from_bytes(s.unpack("c",data[offset:offset+1])[0],byteorder = "little")
+						offset += 1
+
+						distance1 = None
+						points1 = None
+						distance2 = None
+						points2 = None
+						if flagByte & 1:
+							distance1 = s.unpack("f",data[offset:offset+4])[0]
+							offset += 4
+							points1 = s.unpack("f",data[offset:offset+4])[0]
+							offset += 4
+						if flagByte & 2:
+							distance2 = s.unpack("f",data[offset:offset+4])[0]
+							offset += 4
+							points2 = s.unpack("f",data[offset:offset+4])[0]
+							offset += 4
+
+						teamResult.results.append(Result(fisCode,name,surname,birthYear,country,None,distance1,points1,distance2,points2))
+
+					teamCompetition.results.append(teamResult)
+
+				event.competitions.append(teamCompetition)
 
 		return event
 	else:
