@@ -25,13 +25,14 @@ def PredictNextJump(athlete):
 			timestamp = datetime(competition.date.year,competition.date.month,competition.date.day).timestamp()
 
 			data.append([float(res[2] + 1),result.distance1,competition.hillSizeHeight, \
-			float(result.country == event.country),float(timestamp)])
+			float(result.country == event.country),float(timestamp),result.points1])
 			
-	data.sort(key = lambda x: x[-1])
+	data.sort(key = lambda x: x[-2])
 
 	instances = [x[:-1] for x in data]
 	values = [x[-1] for x in data]
 
+	print(len(instances))
 
 	percent = int(len(instances)*.8)
 
