@@ -2,12 +2,10 @@ import tools as t, time, datetime, obdelava_podatkov as op,charts,ml
 
 eventIds = t.GetEventIds(2000,int(datetime.date.today().year))
 # za popravit
-eventIds.remove(11370) # cudne oblike
-eventIds.remove(12302) # imena drzav z malimi crkami
-eventIds.remove(13312) # cudne oblike
-eventIds.remove(24925) # cudne oblike
-eventIds.remove(26510) # imena drzav z malimi crkami
-eventIds.remove(29577) # cudne oblike
+eventIds.remove(13322) # cudne oblike
+eventIds.remove(23918) # cudne oblike
+eventIds.remove(24255) # cudne oblike
+eventIds.remove(45432) # cudne oblike
 eventIds.sort()
 numEvents = len(eventIds)
 
@@ -54,6 +52,6 @@ ml.PredictNextJump(rk)
 # 		if result != None:
 # 			tabTotalPoints.append(result.totalPoints)
 # print(tabTotalPoints)
-#print(athletes[fisCodeMap[2918]])
+# print(athletes[fisCodeMap[2918]])
 
 

@@ -45,7 +45,7 @@ class Date:
 
 	@staticmethod
 	def FromStr(string):
-		# <span class="date__short">Mar 24, 2021</span>
+		# Oblika: Mar 24, 2021
 		monthMap = {
 			"Jan": 1,
 			"Feb": 2,
@@ -88,6 +88,7 @@ class Date:
 		return 31 if month % 2 == 0 else 30
 
 def HillHeightClass(height):
+	''' Iz visine skakalnice pridobimo ime velikosti skakalnice '''
 	if height < 85:
 		return "XX"
 	elif height < 110:
@@ -97,6 +98,7 @@ def HillHeightClass(height):
 	return "FH"
 
 def HillCategory(string):
+	''' Pretvorba med visinami skakalnic oznacenih s K v HS po https://en.wikipedia.org/wiki/Hill_size '''
 	if string.startswith("Team"):
 		string = string.split(" ")[1]
 	
@@ -114,7 +116,7 @@ def HillCategory(string):
 	elif string[:2] == "HS":
 		hsRating = int(string[2:])
 		return (HillHeightClass(hsRating),hsRating)
-	else:
+	else: # ko skakalnica nima stevilske visine, visino pove niz, ki ga nato skrajasmo
 		if string.startswith("Normal"):
 			return ("NH",None)
 		elif string.startswith("Large"):
@@ -126,6 +128,7 @@ def HillCategory(string):
 
 
 class Event:
+	''' Opisuje dogodek na katerem je vec tekmovanj v doloceni drzavi, lahko poteka tudi vec dni '''
 	def __init__(self,eventId = None):
 		if eventId != None:
 			self.eventId = int(eventId)
@@ -149,6 +152,10 @@ class Event:
 
 			tabHillHeights = list(map(HillCategory,tabKindsOfComps))
 
+			regex = re.findall(r"<a class=\"g-lg-2 g-xs-2 justify-center hidden-sm-down\" href=\".+\" target=\"_self\">[\w\n\s\.]+?</a>",html)
+			tabCategories = list(map(ExtractContent,regex))
+			tabCategories = [tabCategories[i].strip() for i in range(len(tabCategories))]
+
 			tabOfGenderTags = re.findall('<div class="gender__item gender__item_\w">\w</div>',html)
 			for genderTag in tabOfGenderTags:
 				tabGenders.append(ExtractContent(genderTag))
@@ -161,9 +168,9 @@ class Event:
 				cancelled = True if re.search("Cancelled",eventStatusItems[4*i + 3]) else False
 				if results and not cancelled: # zagotovimo, da tekmovanje ni bilo odpovedano in da ima #
 					if tabKindsOfComps[i].startswith('Team'): # je ekipna tekma
-						possibleCompetitions.append(TeamCompetition(int(ExtractArgumentValueFromURL(urlsToComps[i],"raceid")),tabGenders[i],tabHillHeights[i]))
+						possibleCompetitions.append(TeamCompetition(int(ExtractArgumentValueFromURL(urlsToComps[i],"raceid")),tabGenders[i],tabHillHeights[i],tabCategories[i]))
 					else: # ni ekipna tekma
-						possibleCompetitions.append(Competition(int(ExtractArgumentValueFromURL(urlsToComps[i],"raceid")),tabGenders[i],tabHillHeights[i]))
+						possibleCompetitions.append(Competition(int(ExtractArgumentValueFromURL(urlsToComps[i],"raceid")),tabGenders[i],tabHillHeights[i],tabCategories[i]))
 					time.sleep(.25) # nekaj casa pocakamo, da nas streznik ne blokira
 
 			for i in range(len(possibleCompetitions)):
@@ -177,15 +184,16 @@ class Event:
 
 		
 class Competition:
-	def __init__(self,raceId = None,gender = None,hillSize = None):
+	def __init__(self,raceId = None,gender = None,hillSize = None,category = None):
 		if raceId != None:
 			self.raceId = raceId
 			self.gender = gender
 			self.hillSizeName,self.hillSizeHeight = hillSize
+			self.category = category
 
 			html = requests.get(f'https://www.fis-ski.com/DB/general/results.html?sectorcode=JP&raceid={raceId}').text
-			tagCategory = re.search(r'<div class="event-header__subtitle">.+?</div>',html).group()
-			self.category = ExtractContent(tagCategory)
+			# tagCategory = re.search(r'<div class="event-header__subtitle">.+?</div>',html).group()
+			# self.category = ExtractContent(tagCategory)
 
 			splitDocument = html.split('<div data-module="cells-join,list-false-links" class="table table_min_height">')
 			if len(splitDocument) == 2:
@@ -207,7 +215,7 @@ class Competition:
 				regex = re.findall(r'<div class="g-lg-2 g-md-2 g-sm-2 hidden-xs justify-right gray pr-1">[0-9]+?</div>',html)
 				tabFisCode = list(map(ExtractContent,regex))
 
-				regex = re.findall(r'<div class="g-lg g-md g-sm g-xs justify-left bold">[\-\w\n\s]+</div>',html)
+				regex = re.findall(r'<div class="g-lg g-md g-sm g-xs justify-left bold">[\w\-\s\.\,]+?</div>',html)
 				tabNames = list(map(ExtractContent,regex))
 				tabNames = [name.strip() for name in tabNames] # odstranimo presledke
 
@@ -300,16 +308,15 @@ class Result:
 
 
 class TeamCompetition:
-	def __init__(self,raceId = None, gender = None,hillSize = None):
+	def __init__(self,raceId = None, gender = None,hillSize = None,category = None):
 		if raceId != None:
 			self.raceId = raceId
 			self.gender = gender
 			self.hillSizeName,self.hillSizeHeight = hillSize
+			self.category = category
 			self.useless = False
 			
 			html = requests.get(f'https://www.fis-ski.com/DB/general/results.html?sectorcode=JP&raceid={raceId}').text
-			tagCategory = re.search(r'<div class="event-header__subtitle">.+</div>',html).group()
-			self.category = ExtractContent(tagCategory)
 
 			splitDocument = html.split('<div data-module="cells-join,list-false-links" class="table table_min_height">')
 			if len(splitDocument) == 2:
@@ -326,76 +333,70 @@ class TeamCompetition:
 				else:
 					self.date = None
 
-				#podatki o rezultatih ekip
-				regex = re.findall(r'<div class="g-lg-9 g-md-9 g-sm-5 g-xs-11 justify-left bold">[\w\n\s\-]+</div>',html) 
-				tabCountryAndNames = list(map(ExtractContent,regex)) #dobimo tako imena držav, kot vseh tekmovalcev
-				tabCountryAndNames = [name.strip() for name in tabCountryAndNames]
-				
-				regex = re.findall(r'<div class="g-lg-2 g-md-2 g-sm-3 hidden-xs justify-right gray pr-1">[0-9]+?</div>',html)
-				tabAllFisCodes = list(map(ExtractContent,regex)) #dobimo vse Fis kode, tudi od tekmovalcev
-				
-				regex = re.findall(r'<div class="g-lg-2 g-md-2 g-sm-3 g-xs-5 justify-right">[0-9.]+?</div>',html)
-				tabTotalPoints = list(map(ExtractContent,regex))
-				
-				tabResultsOfCompetitors = []
-				
-				tabNames = []
-				tabCountry = []
-				country = None
-				
-				for i in range(len(tabCountryAndNames)): #ločimo imena držav in imena tekmovalcev, ter jim dodamo Fis kode in njihovo državo
-					if tabCountryAndNames[i].isupper():#če je niz ves z velikimi črkami potem je država
-						country = tabCountryAndNames[i]
-						tabCountry.append([tabCountryAndNames[i],tabAllFisCodes[i]])
-					else:
-						tabNames.append([tabCountryAndNames[i],tabAllFisCodes[i],country])
-				
-				
-				regex = re.findall(r'<div class="g-lg-1 g-md-1 g-sm-2 g-xs-3 justify-left">[0-9\s]*?</div>',html)
-				tabBirthYears = list(map(ExtractContent,regex))
-				tabBirthYears = [birthYears.strip() for birthYears in tabBirthYears]
-				
-				newHtml = html.split('<div class="g-lg-9 g-md-9 g-sm-5 g-xs-11 justify-left bold">')[1:]
-				tabSoloResoults = [] #tabela tabel skokov/točk vsakega tekmovalca v ekipi
-				for el in newHtml:
-					if re.search(r'<span class="country__name-short">\w+?</span>',el) == None:#odstranimo države
-						regex = re.findall(r'<div class="g-lg-2 g-md-2 g-sm-2 justify-right bold hidden-xs">[0-9\.]*?</div>',el)
-						tabAllDistAndPoints = list(map(ExtractContent,regex))
-						tabAllDistAndPoints = [el.strip() for el in tabAllDistAndPoints]
-						tabSoloResoults.append(tabAllDistAndPoints)
+				rowHtmls = html.split("<div class=\"g-row justify-sb\">")[1:]
 
-				if len(tabSoloResoults) == 0:
-					self.useless = True
-				elif len(tabSoloResoults[0]) < 3 or (tabSoloResoults[0][0] == tabSoloResoults[0][2] and tabSoloResoults[0][3] == tabSoloResoults[0][1]): #bila je samo 1 serija
-					for i in range(len(tabNames)):
-						name = ' '.join(tabNames[i][0].split()[1:])
-						surname = tabNames[i][0].split()[0]
-						birthYear = int(tabBirthYears[i]) if len(tabBirthYears[i]) > 0 else None
-						
-						if tabSoloResoults[i] == []: #tekmovalec nima rezultata
-							tabResultsOfCompetitors.append(Result(int(tabNames[i][1]),name,surname,birthYear,tabNames[i][2]))
-						else:
-							series1 = (float(tabSoloResoults[i][0]) if len(tabSoloResoults[i][0]) > 0 else None,float(tabSoloResoults[i][1]) if len(tabSoloResoults[i][1]) > 0 else None)
-							tabResultsOfCompetitors.append(Result(int(tabNames[i][1]),name,surname,birthYear,tabNames[i][2],None,series1[0],series1[1]))
-				else: # imamo 2 seriji
-					for i in range(len(tabNames)):
-						name = ' '.join(tabNames[i][0].split()[1:])
-						surname = tabNames[i][0].split()[0]
-						birthYear = int(tabBirthYears[i]) if len(tabBirthYears[i]) > 0 else None
-			
-						if tabSoloResoults[i] == []: #tekmovalec nima rezultata
-							tabResultsOfCompetitors.append(Result(int(tabNames[i][1]),name,surname,birthYear,tabNames[i][2]))
-						else:
-							series1 = (float(tabSoloResoults[i][0]) if len(tabSoloResoults[i][0]) > 0 else None,float(tabSoloResoults[i][1]) if len(tabSoloResoults[i][1]) > 0 else None)
-							series2 = (float(tabSoloResoults[i][2]) if len(tabSoloResoults[i][2]) > 0 else None,float(tabSoloResoults[i][3]) if len(tabSoloResoults[i][3]) > 0 else None) 
-							tabResultsOfCompetitors.append(Result(int(tabNames[i][1]),name,surname,birthYear,tabNames[i][2],None,series1[0],series1[1],series2[0],series2[1]))
-			
-			if not self.useless:
 				self.results = []
-				namesPerTeam = int(len(tabNames)/len(tabCountry))#število članov v posamezni ekipi
-				for i in range(len(tabCountry)):
-					self.results.append(TeamResult(tabCountry[i][0],int(tabCountry[i][1]),float(tabTotalPoints[i]),tabResultsOfCompetitors[i*namesPerTeam:(i+1)*namesPerTeam]))
-				
+				for rowHtml in rowHtmls:
+					countryQ = ExtractContent(re.search(r"<span class=\"country__name-short\">[\w\s]*?</span>",rowHtml).group()).strip()
+
+					if len(countryQ) > 0: # drzava
+						country = countryQ
+						countryFisCode = int(ExtractContent(re.search(r"<div class=\"g-lg-2 g-md-2 g-sm-3 hidden-xs justify-right gray pr-1\">[0-9]*?</div>",rowHtml).group()))
+						res = re.search(r"<div class=\"g-lg-2 g-md-2 g-sm-3 g-xs-5 justify-right\">[0-9\.\s]+?</div>",rowHtml)
+						if not res:
+							self.useless = True
+							break
+						countryTotalPoints = float(ExtractContent(res.group()))
+						self.results.append(TeamResult(country,countryFisCode,countryTotalPoints))
+					else: # tekmovalec
+						birthYear = ExtractContent(re.search(r"<div class=\"g-lg-1 g-md-1 g-sm-2 g-xs-3 justify-left\">[x0-9\s]*?</div>",rowHtml).group()).strip()
+
+						res = re.search(r"<div class=\"g-lg-2 g-md-2 g-sm-3 hidden-xs justify-right gray pr-1\">[0-9\s]*?</div>",rowHtml)
+						if res and birthYear == "xxxx":
+							self.results.pop()
+							continue
+						fisCode = int(ExtractContent(res.group()))
+
+						if birthYear.isdigit():
+							birthYear = int(birthYear)
+						else:
+							birthYear = None
+
+						surnameName = ExtractContent(re.search(r"<div class=\"g-lg-[0-9]+? g-md-[0-9]+? g-sm-[0-9]+? g-xs-[0-9]+? justify-left bold\">[\w\-\s\.\,]+?</div>",rowHtml).group()).strip()
+						splitName = surnameName.split(" ")
+						name = " ".join(splitName[1:])
+						surname = splitName[0]
+
+						pointsAndDistances = list(map(ExtractContent,re.findall(r"<div class=\"g-lg-2 g-md-2 g-sm-2 justify-right bold hidden-xs\">[0-9\.\,\s]*?</div>",rowHtml)))
+						if len(pointsAndDistances) > 0:
+							for i in range(len(pointsAndDistances)):
+								if len(pointsAndDistances[i].strip()) > 0:
+									pointsAndDistances[i] = re.sub(r"\,",".",pointsAndDistances[i])
+									pointsAndDistances[i] = float(pointsAndDistances[i])
+								else:
+									pointsAndDistances[i] = None
+
+						lengthPointsDist = len(pointsAndDistances)
+						if lengthPointsDist < 4:
+							pointsAndDistances += [None] * (4 - lengthPointsDist)
+						
+						distance1,points1,distance2,points2 = pointsAndDistances
+
+						totalPoints = 0.0
+						# ce so tocke in dolzine skokov enake za obe seriji upostevamo le prvo
+						if distance1 != None and distance2 != None and points1 != None and points2 != None and points1 == points2 and distance1 == distance2:
+							totalPoints = points1
+							self.results[-1].results.append(Result(fisCode,name,surname,birthYear,self.results[-1].country,totalPoints,distance1,points1))
+						else:
+							if points1 != None:
+								totalPoints += points1
+							if points2 != None:
+								totalPoints += points2
+							
+							if totalPoints == 0.0:
+								totalPoints = None
+							self.results[-1].results.append(Result(fisCode,name,surname,birthYear,self.results[-1].country,totalPoints,distance1,points1,distance2,points2))
+
 		else:
 			self.raceId = None
 			self.gender = None
@@ -507,6 +508,11 @@ def WriteEventToFile(event):
 					if flagByte & 2:
 						thingsToWrite.append(s.pack("f",individualResult.distance2))
 						thingsToWrite.append(s.pack("f",individualResult.points2))
+
+					hasTotalPoints = individualResult.totalPoints != None
+					thingsToWrite.append(s.pack("?",hasTotalPoints))
+					if hasTotalPoints:
+						thingsToWrite.append(s.pack("f",individualResult.totalPoints))
 
 	dat = open(os.path.join("data",f"{event.eventId}.bin"),"wb")
 	for dataInBytes in thingsToWrite:
@@ -654,7 +660,15 @@ def ReadEvent(eventId):
 							points2 = s.unpack("f",data[offset:offset+4])[0]
 							offset += 4
 
-						teamResult.results.append(Result(fisCode,name,surname,birthYear,country,None,distance1,points1,distance2,points2))
+						hasTotalPoints = s.unpack("?",data[offset:offset+1])[0]
+						offset += 1
+
+						totalPoints = None
+						if hasTotalPoints:
+							totalPoints = s.unpack("f",data[offset:offset+4])[0]
+							offset += 4
+
+						teamResult.results.append(Result(fisCode,name,surname,birthYear,country,totalPoints,distance1,points1,distance2,points2))
 
 					teamCompetition.results.append(teamResult)
 
@@ -705,4 +719,3 @@ def ToOrdinalStr(number):
 	elif lastDigit == 3:
 		return f"{number}rd"
 	return f"{number}th"
-		

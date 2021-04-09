@@ -42,7 +42,7 @@ def PredictNextJump(athlete):
 	testInstances = instances[percent:]
 	testValues = values[percent:]
 
-	regressors = {"kNN": neighbors.KNeighborsRegressor(), "LR": linear_model.LinearRegression(), "DT": tree.DecisionTreeRegressor(), "RF": ensemble.RandomForestRegressor(max_depth = 20, n_estimators = 50), "SVM": svm.SVR(gamma = 'scale')}
+	regressors = {"\"kNN\"": neighbors.KNeighborsRegressor(), "\"LR\"": linear_model.LinearRegression(), "\"DT\"": tree.DecisionTreeRegressor(), "\"RF\"": ensemble.RandomForestRegressor(max_depth = 20, n_estimators = 50), "\"SVM\"": svm.SVR(gamma = 'scale')}
 
 	print("   Model |  MAPE")
 
@@ -50,4 +50,4 @@ def PredictNextJump(athlete):
 		regressor.fit(trainInstances, trainValues)
 		testPredictions = regressor.predict(testInstances)
 
-		print("{:>8s} | {:5.2f}%".format("'" + name + "'", 100 * MAPE(testValues, testPredictions)))
+		print(f"{name:>8s} | {100 * MAPE(testValues, testPredictions):5.2f}%")
