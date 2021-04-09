@@ -23,8 +23,71 @@ rk = athletes[fisCodeMap[2918]]
 
 pp = athletes[fisCodeMap[5658]]
 
-# ml.PredictNextJump(rk)
-    
+ml.PredictNextJump(pp)
+
+print("A")
+fisCodes = op.MostNRanks(athletes,1,2000,2021)
+print(fisCodes)
+bigWinner = athletes[fisCodeMap[fisCodes[0][0]]]
+print(bigWinner.name,bigWinner.surname)
+
+fisCodes = op.MostNRanks(athletes,2,2000,2021)
+print(fisCodes)
+bigWinner = athletes[fisCodeMap[fisCodes[0][0]]]
+print(bigWinner.name,bigWinner.surname)
+
+fisCodes = op.MostNRanks(athletes,3,2000,2021)
+print(fisCodes)
+bigWinner = athletes[fisCodeMap[fisCodes[0][0]]]
+print(bigWinner.name,bigWinner.surname)
+
+fisCodes = op.MostNRanks(athletes,4,2000,2021)
+print(fisCodes)
+bigLoser = athletes[fisCodeMap[fisCodes[0][0]]]
+print(bigLoser.name,bigLoser.surname)
+
+print("M")
+fisCodes = op.MostNRanks(athletes,1,2000,2021,"M")
+print(fisCodes)
+bigWinner = athletes[fisCodeMap[fisCodes[0][0]]]
+print(bigWinner.name,bigWinner.surname)
+
+fisCodes = op.MostNRanks(athletes,2,2000,2021,"M")
+print(fisCodes)
+bigWinner = athletes[fisCodeMap[fisCodes[0][0]]]
+print(bigWinner.name,bigWinner.surname)
+
+fisCodes = op.MostNRanks(athletes,3,2000,2021,"M")
+print(fisCodes)
+bigWinner = athletes[fisCodeMap[fisCodes[0][0]]]
+print(bigWinner.name,bigWinner.surname)
+
+fisCodes = op.MostNRanks(athletes,4,2000,2021,"M")
+print(fisCodes)
+bigLoser = athletes[fisCodeMap[fisCodes[0][0]]]
+print(bigLoser.name,bigLoser.surname)
+
+print("W")
+fisCodes = op.MostNRanks(athletes,1,2000,2021,"W")
+print(fisCodes)
+bigWinner = athletes[fisCodeMap[fisCodes[0][0]]]
+print(bigWinner.name,bigWinner.surname)
+
+fisCodes = op.MostNRanks(athletes,2,2000,2021,"W")
+print(fisCodes)
+bigWinner = athletes[fisCodeMap[fisCodes[0][0]]]
+print(bigWinner.name,bigWinner.surname)
+
+fisCodes = op.MostNRanks(athletes,3,2000,2021,"W")
+print(fisCodes)
+bigWinner = athletes[fisCodeMap[fisCodes[0][0]]]
+print(bigWinner.name,bigWinner.surname)
+
+fisCodes = op.MostNRanks(athletes,4,2000,2021,"W")
+print(fisCodes)
+bigLoser = athletes[fisCodeMap[fisCodes[0][0]]]
+print(bigLoser.name,bigLoser.surname)
+
 #x = list(range(2000,2021 + 1))
 # y = [[0,0,0,0,0] for _ in range(len(x))]
 

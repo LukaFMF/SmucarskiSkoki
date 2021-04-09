@@ -1,5 +1,43 @@
 import tools as t
 
+def MostNRanks(athletes,n,startYear,endYear = None,gender = None):
+	''' Vrne tabelo fis kod tekmovalcev, ki so najveckrat osvojili n-to mesto. Ce je ni vrne prazno tabelo '''
+	if endYear == None:
+		endYear = startYear
+
+	if gender == None:
+		gender = "MW"
+
+	fisCodeAndNumN = dict()
+	for year in range(startYear,endYear + 1):
+		for athlete in athletes:
+			for result in athlete.personalResults:
+				if len(result) == 3: # ne upostevamo ekipnih tekmovanj
+					i,j,k = result
+					if (athlete.events[i].competitions[j].date.year == year and 
+						athlete.events[i].competitions[j].category != "QUA" and
+						athlete.events[i].competitions[j].gender in gender and
+						k + 1 == n): # ce je uvrstitev enaka iskani
+						if athlete.fisCode in fisCodeAndNumN:
+							fisCodeAndNumN[athlete.fisCode] += 1
+						else:
+							fisCodeAndNumN[athlete.fisCode] = 1
+
+	mostNs = max(fisCodeAndNumN.values())
+
+	tabMostNs = []
+	for fisCode,numN in fisCodeAndNumN.items():
+		if numN == mostNs:
+			tabMostNs.append(fisCode)
+
+	return tabMostNs,mostNs
+	
+
+
+
+		
+		
+
 def athleteResults(events):
 	athletes = []
 	fisCodesToIndex = {}
