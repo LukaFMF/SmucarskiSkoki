@@ -160,6 +160,9 @@ class Event:
 			for genderTag in tabOfGenderTags:
 				tabGenders.append(ExtractContent(genderTag))
 
+			if eventId == 48979:
+				print(tabGenders)
+
 			eventStatusItems = re.findall(r"<span class=\"status__item.+?>",html) # podatki o posameznem dogodku(ce je bil odpovedan, ce so rezultati na voljo)
 
 			possibleCompetitions = []
@@ -168,9 +171,9 @@ class Event:
 				cancelled = True if re.search("Cancelled",eventStatusItems[4*i + 3]) else False
 				if results and not cancelled: # zagotovimo, da tekmovanje ni bilo odpovedano in da ima #
 					if tabKindsOfComps[i].startswith('Team'): # je ekipna tekma
-						possibleCompetitions.append(TeamCompetition(int(ExtractArgumentValueFromURL(urlsToComps[i],"raceid")),tabGenders[i],tabHillHeights[i],tabCategories[i]))
+						possibleCompetitions.append(TeamCompetition(int(ExtractArgumentValueFromURL(urlsToComps[i],"raceid")),tabGenders[i*2],tabHillHeights[i],tabCategories[i]))
 					else: # ni ekipna tekma
-						possibleCompetitions.append(Competition(int(ExtractArgumentValueFromURL(urlsToComps[i],"raceid")),tabGenders[i],tabHillHeights[i],tabCategories[i]))
+						possibleCompetitions.append(Competition(int(ExtractArgumentValueFromURL(urlsToComps[i],"raceid")),tabGenders[i*2],tabHillHeights[i],tabCategories[i]))
 					time.sleep(.25) # nekaj casa pocakamo, da nas streznik ne blokira
 
 			for i in range(len(possibleCompetitions)):

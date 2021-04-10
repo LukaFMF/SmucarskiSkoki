@@ -33,11 +33,6 @@ def MostNRanks(athletes,n,startYear,endYear = None,gender = None):
 	return tabMostNs,mostNs
 	
 
-
-
-		
-		
-
 def athleteResults(events):
 	athletes = []
 	fisCodesToIndex = {}
