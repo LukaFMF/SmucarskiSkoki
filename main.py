@@ -23,28 +23,39 @@ rk = athletes[fisCodeMap[2918]]
 
 pp = athletes[fisCodeMap[5658]]
 
-ml.PredictNextJump(pp)
+#ml.PredictNextJump(pp)
 
-print("A")
-fisCodes = op.MostNRanks(athletes,1,2000,2021)
+fisCodes = op.TeamAthletesPrediction(athletes,'SLO')
 print(fisCodes)
-bigWinner = athletes[fisCodeMap[fisCodes[0][0]]]
-print(bigWinner.name,bigWinner.surname)
+bigWinner1 = athletes[fisCodeMap[fisCodes[0][0]]]
+bigWinner2 = athletes[fisCodeMap[fisCodes[1][0]]]
+bigWinner3 = athletes[fisCodeMap[fisCodes[2][0]]]
+bigWinner4 = athletes[fisCodeMap[fisCodes[3][0]]]
+print(bigWinner1.name,bigWinner1.surname)
+print(bigWinner2.name,bigWinner2.surname)
+print(bigWinner3.name,bigWinner3.surname)
+print(bigWinner4.name,bigWinner4.surname)
 
-fisCodes = op.MostNRanks(athletes,2,2000,2021)
-print(fisCodes)
-bigWinner = athletes[fisCodeMap[fisCodes[0][0]]]
-print(bigWinner.name,bigWinner.surname)
+#print("A")
+#fisCodes = op.MostNRanks(athletes,1,2000,2021)
+#print(fisCodes)
+#bigWinner = athletes[fisCodeMap[fisCodes[0][0]]]
+#print(bigWinner.name,bigWinner.surname)
 
-fisCodes = op.MostNRanks(athletes,3,2000,2021)
-print(fisCodes)
-bigWinner = athletes[fisCodeMap[fisCodes[0][0]]]
-print(bigWinner.name,bigWinner.surname)
+#fisCodes = op.MostNRanks(athletes,2,2000,2021)
+#print(fisCodes)
+#bigWinner = athletes[fisCodeMap[fisCodes[0][0]]]
+#print(bigWinner.name,bigWinner.surname)
 
-fisCodes = op.MostNRanks(athletes,4,2000,2021)
-print(fisCodes)
-bigLoser = athletes[fisCodeMap[fisCodes[0][0]]]
-print(bigLoser.name,bigLoser.surname)
+#fisCodes = op.MostNRanks(athletes,3,2000,2021)
+#print(fisCodes)
+#bigWinner = athletes[fisCodeMap[fisCodes[0][0]]]
+#print(bigWinner.name,bigWinner.surname)
+
+#fisCodes = op.MostNRanks(athletes,4,2000,2021)
+#print(fisCodes)
+#bigLoser = athletes[fisCodeMap[fisCodes[0][0]]]
+#print(bigLoser.name,bigLoser.surname)
 
 print("M")
 fisCodes = op.MostNRanks(athletes,1,2000,2021,"M")
@@ -67,26 +78,26 @@ print(fisCodes)
 bigLoser = athletes[fisCodeMap[fisCodes[0][0]]]
 print(bigLoser.name,bigLoser.surname)
 
-print("W")
-fisCodes = op.MostNRanks(athletes,1,2000,2021,"W")
-print(fisCodes)
-bigWinner = athletes[fisCodeMap[fisCodes[0][0]]]
-print(bigWinner.name,bigWinner.surname)
+#print("W")
+#fisCodes = op.MostNRanks(athletes,1,2000,2021,"W")
+#print(fisCodes)
+#bigWinner = athletes[fisCodeMap[fisCodes[0][0]]]
+#print(bigWinner.name,bigWinner.surname)
 
-fisCodes = op.MostNRanks(athletes,2,2000,2021,"W")
-print(fisCodes)
-bigWinner = athletes[fisCodeMap[fisCodes[0][0]]]
-print(bigWinner.name,bigWinner.surname)
+#fisCodes = op.MostNRanks(athletes,2,2000,2021,"W")
+#print(fisCodes)
+#bigWinner = athletes[fisCodeMap[fisCodes[0][0]]]
+#print(bigWinner.name,bigWinner.surname)
 
-fisCodes = op.MostNRanks(athletes,3,2000,2021,"W")
-print(fisCodes)
-bigWinner = athletes[fisCodeMap[fisCodes[0][0]]]
-print(bigWinner.name,bigWinner.surname)
+#fisCodes = op.MostNRanks(athletes,3,2000,2021,"W")
+#print(fisCodes)
+#bigWinner = athletes[fisCodeMap[fisCodes[0][0]]]
+#print(bigWinner.name,bigWinner.surname)
 
-fisCodes = op.MostNRanks(athletes,4,2000,2021,"W")
-print(fisCodes)
-bigLoser = athletes[fisCodeMap[fisCodes[0][0]]]
-print(bigLoser.name,bigLoser.surname)
+#fisCodes = op.MostNRanks(athletes,4,2000,2021,"W")
+#print(fisCodes)
+#bigLoser = athletes[fisCodeMap[fisCodes[0][0]]]
+#print(bigLoser.name,bigLoser.surname)
 
 #x = list(range(2000,2021 + 1))
 # y = [[0,0,0,0,0] for _ in range(len(x))]
