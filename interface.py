@@ -1,4 +1,5 @@
 import tkinter as tk
+from tkinter import messagebox
 import tkinter.ttk as ttk
 import tools as t, time, datetime,obdelava_podatkov as op
 from math import sin,pi
@@ -153,7 +154,7 @@ class MainMenu(tk.Tk):
 		#teamCountries,hillSizeName,hillSizeHeight,competitionCountry,startYear = 2020,endYear = 2021,gender = "M"
 
 	def Simulate(self):
-		print(self.simCountryListbox.curselection())
+		pass
 
 
 		
@@ -161,21 +162,146 @@ class MainMenu(tk.Tk):
 		
 
 	def MostNthPlacesSolo(self):
-		pass
+		sub = tk.Toplevel(self)
+		sub.wm_title("Most solo n-th places")
+		sub.resizable(False,False)
+		sub.geometry("400x400")
+
+		self.mostNPlaceSpinbox = tk.Spinbox(sub, from_=1, to=50,state = 'readonly')
+		self.mostNPlaceSpinbox.pack()
+
+		self.mostNGenderVar = tk.IntVar()
+		self.mostNGenderMRadiobutton = tk.Radiobutton(sub, text="Male", variable=self.mostNGenderVar, value=0)
+		self.mostNGenderMRadiobutton.pack()
+
+		self.mostNGenderWRadiobutton = tk.Radiobutton(sub, text="Female", variable=self.mostNGenderVar, value=1) 
+		self.mostNGenderWRadiobutton.pack()
+
+
+		self.mostNStartYearSpinbox = tk.Spinbox(sub, from_=2000, to=2021,state = 'readonly')
+		self.mostNStartYearSpinbox.pack()
+
+		
+		self.mostNEndYearSpinbox = tk.Spinbox(sub, from_= 2000, to=2021,state = 'readonly')
+		self.mostNEndYearSpinbox.pack()
+
+
+		self.execNPlaceBtn = tk.Button(sub,text = 'Show results',command = self.MostNthPlacesSoloExec)
+		self.execNPlaceBtn.pack()
+
+	def MostNthPlacesSoloExec(self):
+		
+
+		if int(self.mostNEndYearSpinbox.get()) < int(self.mostNStartYearSpinbox.get()): #popravimo meje
+			tk.messagebox.showwarning(title='Warning', message='Selected start year must be below selected end year.')
+			
+
 
 	def MostNthPlacesTeam(self):
-		pass
+		sub = tk.Toplevel(self)
+		sub.wm_title("Most team n-th places")
+		sub.resizable(False,False)
+		sub.geometry("400x400")
+
+		self.mostNTeamPlaceSpinbox = tk.Spinbox(sub, from_=1, to=50,state = 'readonly')
+		self.mostNTeamPlaceSpinbox.pack()
+
+		self.mostNTeamGenderVar = tk.IntVar()
+		self.mostNTeamGenderMRadiobutton = tk.Radiobutton(sub, text="Male", variable=self.mostNTeamGenderVar, value=0)
+		self.mostNTeamGenderMRadiobutton.pack()
+
+		self.mostNTeamGenderWRadiobutton = tk.Radiobutton(sub, text="Female", variable=self.mostNTeamGenderVar, value=1) 
+		self.mostNTeamGenderWRadiobutton.pack()
+
+		self.mostNTeamGenderARadiobutton = tk.Radiobutton(sub, text="Mixed", variable=self.mostNTeamGenderVar, value=2) 
+		self.mostNTeamGenderARadiobutton.pack()
+
+
+		self.mostNTeamStartYearSpinbox = tk.Spinbox(sub, from_=2000, to=2021,state = 'readonly')
+		self.mostNTeamStartYearSpinbox.pack()
+
+		
+		self.mostNTeamEndYearSpinbox = tk.Spinbox(sub, from_= 2000, to=2021,state = 'readonly')
+		self.mostNTeamEndYearSpinbox.pack()
+
+
+		self.execNTeamPlaceBtn = tk.Button(sub,text = 'Show results',command = self.MostNthPlacesTeamExec)
+		self.execNTeamPlaceBtn.pack()
+
+	def MostNthPlacesTeamExec(self):
+		
+		
+		
+		if int(self.mostNTeamEndYearSpinbox.get()) < int(self.mostNTeamStartYearSpinbox.get()): 
+			tk.messagebox.showwarning(title='Warning', message='Selected start year must be below selected end year.', **options)
+			
 
 	def GraphHomeAway(self):
 		pass
 
 	def TopTeamCountry(self):
-		pass
+		sub = tk.Toplevel(self)
+		sub.wm_title("Top country team")
+		sub.resizable(False,False)
+		sub.geometry("400x400")
+
+		#country,hill = 'LH',startYear = 2020,endYear = 2021,gender = 'M'
+
+		countries = sorted(['GER','AUT','JPN','FIN','NOR','POL','SLO','CZE','RUS','SUI'])
+
+		
+		self.topTeamCountryCombobox= ttk.Combobox(sub,values = countries,state = 'readonly')
+		self.topTeamCountryCombobox.pack()
+		
+		self.topTeamHillSizeVar = tk.IntVar()
+		self.topTeamHillSizeNH = tk.Radiobutton(sub, text="Normal hill", variable=self.topTeamHillSizeVar, value=0)
+		self.topTeamHillSizeNH.pack() 
+		self.topTeamHillSizeLH = tk.Radiobutton(sub, text="Large hill", variable=self.topTeamHillSizeVar, value=1)
+		self.topTeamHillSizeLH.pack()
+		self.topTeamHillSizeFH = tk.Radiobutton(sub, text="Flying hill", variable=self.topTeamHillSizeVar, value=2)
+		self.topTeamHillSizeFH.pack()
+
+		self.topTeamGenderVar = tk.IntVar()
+		self.topTeamGenderMRadiobutton = tk.Radiobutton(sub, text="Male", variable=self.topTeamGenderVar, value=0)
+		self.topTeamGenderMRadiobutton.pack()
+
+		self.topTeamGenderWRadiobutton = tk.Radiobutton(sub, text="Female", variable=self.topTeamGenderVar, value=1) 
+		self.topTeamGenderWRadiobutton.pack()
+
+		self.topTeamGenderARadiobutton = tk.Radiobutton(sub, text="Mixed", variable=self.topTeamGenderVar, value=2) 
+		self.topTeamGenderARadiobutton.pack()
+
+
+		self.topTeamStartYearSpinbox = tk.Spinbox(sub, from_=2000, to=2021,state = 'readonly')
+		self.topTeamStartYearSpinbox.pack()
+
+		
+		self.topTeamEndYearSpinbox = tk.Spinbox(sub, from_= 2000, to=2021,state = 'readonly')
+		self.topTeamEndYearSpinbox.pack()
+
+
+		self.exectopTeamCountryBtn = tk.Button(sub,text = 'Show results',command = self.TopTeamCountryExec)
+		self.exectopTeamCountryBtn.pack()
+
+	def TopTeamCountryExec(self):
+
+
+
+
+		if int(self.topTeamEndYearSpinbox.get()) < int(self.topTeamStartYearSpinbox.get()): #popravimo meje
+			tk.messagebox.showwarning(title='Warning', message='Selected start year must be below selected end year.', **options)
 
 	def DisplaySoloResults(self):
 		pass
 
+
+	def DisplaySoloResultsExec(self):
+		pass
+
 	def DisplayTeamResults(self):
+		pass
+
+	def DisplayTeamResultsExec(self):
 		pass
 
 	def GraphNumMedalsSolo(self):
