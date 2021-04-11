@@ -630,7 +630,100 @@ class MainMenu(tk.Tk):
 					
 
 	def CompareTotalScores(self):
-		pass
+		sub = tk.Toplevel(self)
+		sub.wm_title("Comparison")
+		sub.resizable(False,False)
+		sub.geometry("400x400")
+
+		self.CompareTotalScoresNamebox1 = tk.Text(sub,height = 1,width = 25)
+		self.CompareTotalScoresSurnamebox1 = tk.Text(sub,height = 1,width = 25)
+		self.CompareTotalScoresNamebox1.pack()
+		self.CompareTotalScoresSurnamebox1.pack()
+
+		self.CompareTotalScoresNamebox2 = tk.Text(sub,height = 1,width = 25)
+		self.CompareTotalScoresSurnamebox2 = tk.Text(sub,height = 1,width = 25)
+		self.CompareTotalScoresNamebox2.pack()
+		self.CompareTotalScoresSurnamebox2.pack()
+
+		self.CompareTotalScoresHillSizeNameVar = tk.IntVar(sub,0)
+		self.CompareTotalScoresHillSize1Radio = tk.Radiobutton(sub,text = "Normal hill",variable = self.CompareTotalScoresHillSizeNameVar,value = 0) # 85–109
+		self.CompareTotalScoresHillSize2Radio = tk.Radiobutton(sub,text = "Large hill",variable = self.CompareTotalScoresHillSizeNameVar,value = 1) # 110–184
+		self.CompareTotalScoresHillSize3Radio = tk.Radiobutton(sub,text = "Flying hill",variable = self.CompareTotalScoresHillSizeNameVar,value = 2) # > 185
+		self.CompareTotalScoresHillSize3Radio.pack()
+		self.CompareTotalScoresHillSize2Radio.pack()
+		self.CompareTotalScoresHillSize1Radio.pack()
+
+
+		self.execCompareTotalScoresBtn = tk.Button(sub,text = 'Show results',command = self.CompareTotalScoresExec)
+		self.execCompareTotalScoresBtn.pack()
+
+	def CompareTotalScoresExec(self):
+		HillSizeVar = self.CompareTotalScoresHillSizeNameVar.get()
+		HillSizeName = ['NH','LH','FH'][HillSizeVar]
+		print(HillSizeName)
+
+		name1 = self.CompareTotalScoresNamebox1.get("1.0",tk.END).strip()
+		surname1 = self.CompareTotalScoresSurnamebox1.get("1.0",tk.END).strip()
+		fisCode1 = op.Athlete.GetAthleteFisByName(self.athletes,name1,surname1)
+
+		name2 = self.CompareTotalScoresNamebox2.get("1.0",tk.END).strip()
+		surname2 = self.CompareTotalScoresSurnamebox2.get("1.0",tk.END).strip()
+		fisCode2 = op.Athlete.GetAthleteFisByName(self.athletes,name2,surname2)
+
+		if fisCode1 == None:  
+			tk.messagebox.showwarning("Warning",f"Name {name1} {surname1} not found!")
+		if fisCode2 == None:
+			tk.messagebox.showwarning("Warning",f"Name {name2} {surname2} not found!")
+		else:
+			athlete1 = self.athletes[self.fisCodeMap[fisCode1]]
+			tabAverageTotalPoints1 = []
+			y1 = []
+
+			athlete2 = self.athletes[self.fisCodeMap[fisCode2]]
+			tabAverageTotalPoints2 = []
+			y2 = []
+
+			setBothYears = set()
+			for result1 in athlete1.personalResults:
+					if len(result1) == 3 and athlete1.events[result1[0]].competitions[result1[1]].hillSizeName == HillSizeName:
+						i,j,k = result1
+						setBothYears.add(athlete1.events[i].competitions[j].date.year)
+			for result2 in athlete2.personalResults:
+					if len(result2) == 3 and athlete2.events[result2[0]].competitions[result2[1]].hillSizeName == HillSizeName:
+						i,j,k = result2
+						setBothYears.add(athlete2.events[i].competitions[j].date.year)
+			lower = min(setBothYears)
+			upper = max(setBothYears)
+			x = list(range(lower,upper))
+			print(x)
+			for i in range(len(x)):
+				year = x[i]
+				for result1 in athlete1.personalResults:
+					if (len(result1) == 3 and athlete1.events[result1[0]].competitions[result1[1]].hillSizeName == HillSizeName
+					and athlete1.events[result1[0]].competitions[result1[1]].date.year == year):
+						y1.append(athlete1.events[result1[0]].competitions[result1[1]].results[result1[2]].totalPoints)
+				tabAverageTotalPoints1.append(sum(y1)/len(y1) if len(y1) != 0 else 0) #če ni total pointov dodamo v tabelo povprečij 0
+				y1 = []
+
+			for i in range(len(x)):
+				year = x[i]
+				for result2 in athlete2.personalResults:
+					if (len(result2) == 3 and athlete2.events[result2[0]].competitions[result2[1]].hillSizeName == HillSizeName and
+					athlete2.events[result2[0]].competitions[result2[1]].results[result2[2]].totalPoints != None
+					and athlete2.events[result2[0]].competitions[result2[1]].date.year == year):
+						y2.append(athlete2.events[result2[0]].competitions[result2[1]].results[result2[2]].totalPoints)
+				tabAverageTotalPoints2.append(sum(y2)/len(y2) if len(y2) != 0 else 0)
+				y2 = []
+			print(tabAverageTotalPoints1)
+			print(tabAverageTotalPoints2)
+
+
+			charts.LineChart(x,(tabAverageTotalPoints1,tabAverageTotalPoints2),f'Comparison between {name1} {surname1} and {name2} {surname2}.','Years','Total points',[surname1,surname2])
+
+
+
+
+
 
 
 
