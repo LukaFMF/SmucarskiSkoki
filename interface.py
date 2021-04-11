@@ -9,7 +9,7 @@ def RadioInxToGender(inx):
 	if inx == 0:
 		return "M"
 	elif inx == 1:
-		return "F"
+		return "W"
 	return "A"
 
 def RadioInxToHillRating(inx):
@@ -159,11 +159,11 @@ class MainMenu(tk.Tk):
 				resultRow.append("")
 				rows.append(resultRow)
 
-			for i in range(len(rows)):
-				for j in range(len(rows[0])):
-					self.soloResultEntry = tk.Entry(sub, width=20)
-					self.soloResultEntry.grid(row = i,column = j)
-					self.soloResultEntry.insert(tk.END,rows[i][j])
+		for i in range(len(rows)):
+			for j in range(len(rows[0])):
+				self.soloResultEntry = tk.Entry(sub, width=20)
+				self.soloResultEntry.grid(row = i,column = j)
+				self.soloResultEntry.insert(tk.END,rows[i][j])
 
 	
 	def Simulation(self):
@@ -178,6 +178,7 @@ class MainMenu(tk.Tk):
 		self.simCountryListbox.pack()
 		for country in countries:
 			self.simCountryListbox.insert(tk.END,country)
+
 
 		self.simHillSizeName = tk.IntVar(self.simWindow,0)
 		self.simHillSizeNameNHRadio = tk.Radiobutton(self.simWindow,text = "Normal hill",variable = self.simHillSizeName,value = 0) # 85–109
@@ -239,40 +240,39 @@ class MainMenu(tk.Tk):
 			tk.messagebox.showwarning('Warning','You must select at least one competitor country!')
 		else:
 			teamCompetition = op.SimulateTeamCompetition(self.athletes,self.fisCodeMap,selectedCountries,hillSizeName,hillSizeHeight,competitionCountry,startYear,endYear,gender)
-			teamCompetition = op.SimulateTeamCompetition(self.athletes,self.fisCodeMap,selectedCountries,hillSizeName,hillSizeHeight,competitionCountry,startYear,endYear,gender)
 			self.ShowTeamCompetition(self.simWindow,teamCompetition)
 
 
 	def MostNthPlacesSolo(self):
-		sub = tk.Toplevel(self)
+		self.simWindow = tk.Toplevel(self)
 		sub.wm_title("Most solo n-th places")
 		sub.resizable(False,False)
 		sub.geometry("400x400")
     	#tk.Label(text = text)
 
-		self.mostNPlabel = tk.Label(sub,text = 'Rank:')
+		self.mostNPlabel = tk.Label(self.simWindow,text = 'Rank:')
 		self.mostNPlabel.pack()
-		self.mostNPlaceSpinbox = tk.Spinbox(sub, from_=1, to=50,state = 'readonly')
+		self.mostNPlaceSpinbox = tk.Spinbox(self.simWindow, from_=1, to=50,state = 'readonly')
 		self.mostNPlaceSpinbox.pack()
 		
-		self.mostNGender = tk.Label(sub,text = 'Gender:')
+		self.mostNGender = tk.Label(self.simWindow,text = 'Gender:')
 		self.mostNGender.pack()
 		self.mostNGenderVar = tk.IntVar()
-		self.mostNGenderMRadiobutton = tk.Radiobutton(sub, text="Male", variable=self.mostNGenderVar, value=0)
+		self.mostNGenderMRadiobutton = tk.Radiobutton(self.simWindow, text="Male", variable=self.mostNGenderVar, value=0)
 		self.mostNGenderMRadiobutton.pack()
 
-		self.mostNGenderWRadiobutton = tk.Radiobutton(sub, text="Female", variable=self.mostNGenderVar, value=1) 
+		self.mostNGenderWRadiobutton = tk.Radiobutton(self.simWindow, text="Female", variable=self.mostNGenderVar, value=1) 
 		self.mostNGenderWRadiobutton.pack()
 
-		self.mostNloweryear = tk.Label(sub,text = 'From:')
+		self.mostNloweryear = tk.Label(self.simWindow,text = 'From:')
 		self.mostNloweryear.pack()
 		currentYear = t.Date.Today().year
-		self.mostNStartYearSpinbox = tk.Spinbox(sub, from_=2000, to=currentYear,state = 'readonly')
+		self.mostNStartYearSpinbox = tk.Spinbox(self.simWindow, from_=2000, to=currentYear,state = 'readonly')
 		self.mostNStartYearSpinbox.pack()
 
 		self.mostNlupperyear = tk.Label(sub,text = 'To:')
 		self.mostNlupperyear.pack()
-		self.mostNEndYearSpinbox = tk.Spinbox(sub, from_= 2000, to=currentYear,state = 'readonly')
+		self.mostNEndYearSpinbox = tk.Spinbox(self.simWindow, from_= 2000, to=currentYear,state = 'readonly')
 		self.mostNEndYearSpinbox.pack()
 
 
@@ -430,9 +430,6 @@ class MainMenu(tk.Tk):
 
 		self.topTeamGenderWRadiobutton = tk.Radiobutton(self.topTeamWindow, text="Female", variable=self.topTeamGenderVar, value=1) 
 		self.topTeamGenderWRadiobutton.pack()
-
-		self.topTeamGenderARadiobutton = tk.Radiobutton(self.topTeamWindow, text="Mixed", variable=self.topTeamGenderVar, value=2) 
-		self.topTeamGenderARadiobutton.pack()
 
 		self.loweryearlabel = tk.Label(self.topTeamWindow,text = 'From:')
 		self.loweryearlabel.pack()
@@ -639,6 +636,7 @@ class MainMenu(tk.Tk):
 		self.numMedalsSoloSurnamelabel.pack()
 		self.numMedalsSoloSurnamebox = tk.Text(sub,height = 1,width = 25)
 		self.numMedalsSoloSurnamebox.pack()
+	
 
 		self.numMedalsSoloButtonExec = tk.Button(sub,text = "Show results",command = self.GraphNumMedalsSoloExec)
 		self.numMedalsSoloButtonExec.pack()
@@ -728,18 +726,19 @@ class MainMenu(tk.Tk):
 		self.CompareTotalScoresName1label = tk.Label(sub,text = 'Name:')
 		self.CompareTotalScoresName1label.pack()
 		self.CompareTotalScoresNamebox1 = tk.Text(sub,height = 1,width = 25)
-		self.CompareTotalScoresSurname1label = tk.Label(sub,text = 'Surname:')
-		self.CompareTotalScoresSurnamebox1 = tk.Text(sub,height = 1,width = 25)
 		self.CompareTotalScoresNamebox1.pack()
+		self.CompareTotalScoresSurname1label = tk.Label(sub,text = 'Surname:')
+		self.CompareTotalScoresSurname1label.pack()
+		self.CompareTotalScoresSurnamebox1 = tk.Text(sub,height = 1,width = 25)
 		self.CompareTotalScoresSurnamebox1.pack()
 
 		self.CompareTotalScoresName2label = tk.Label(sub,text = 'Name:')
 		self.CompareTotalScoresName2label.pack()
 		self.CompareTotalScoresNamebox2 = tk.Text(sub,height = 1,width = 25)
+		self.CompareTotalScoresNamebox2.pack()
 		self.CompareTotalScoresSurname2label = tk.Label(sub,text = 'Surname:')
 		self.CompareTotalScoresSurname2label.pack()
 		self.CompareTotalScoresSurnamebox2 = tk.Text(sub,height = 1,width = 25)
-		self.CompareTotalScoresNamebox2.pack()
 		self.CompareTotalScoresSurnamebox2.pack()
 
 		self.CompareTotalScoresHillSizelabel = tk.Label(sub,text = 'Hill size:')
@@ -748,9 +747,9 @@ class MainMenu(tk.Tk):
 		self.CompareTotalScoresHillSize1Radio = tk.Radiobutton(sub,text = "Normal hill",variable = self.CompareTotalScoresHillSizeNameVar,value = 0) # 85–109
 		self.CompareTotalScoresHillSize2Radio = tk.Radiobutton(sub,text = "Large hill",variable = self.CompareTotalScoresHillSizeNameVar,value = 1) # 110–184
 		self.CompareTotalScoresHillSize3Radio = tk.Radiobutton(sub,text = "Flying hill",variable = self.CompareTotalScoresHillSizeNameVar,value = 2) # > 185
-		self.CompareTotalScoresHillSize3Radio.pack()
-		self.CompareTotalScoresHillSize2Radio.pack()
 		self.CompareTotalScoresHillSize1Radio.pack()
+		self.CompareTotalScoresHillSize2Radio.pack()
+		self.CompareTotalScoresHillSize3Radio.pack()
 
 
 		self.execCompareTotalScoresBtn = tk.Button(sub,text = 'Show results',command = self.CompareTotalScoresExec)
@@ -793,7 +792,7 @@ class MainMenu(tk.Tk):
 			lower = min(setBothYears)
 			upper = max(setBothYears)
 			x = list(range(lower,upper))
-			print(x)
+			
 			for i in range(len(x)):
 				year = x[i]
 				for result1 in athlete1.personalResults:
@@ -812,9 +811,6 @@ class MainMenu(tk.Tk):
 						y2.append(athlete2.events[result2[0]].competitions[result2[1]].results[result2[2]].totalPoints)
 				tabAverageTotalPoints2.append(sum(y2)/len(y2) if len(y2) != 0 else 0)
 				y2 = []
-			print(tabAverageTotalPoints1)
-			print(tabAverageTotalPoints2)
-
 
 			charts.LineChart(x,(tabAverageTotalPoints1,tabAverageTotalPoints2),f'Comparison between {athlete1.name} {athlete1.surname} and {athlete2.name} {athlete2.surname}','Year','Average total points',[athlete1.surname,athlete2.surname])
 
