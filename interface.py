@@ -198,12 +198,12 @@ class MainMenu(tk.Tk):
 		self.mostNGenderWRadiobutton = tk.Radiobutton(sub, text="Female", variable=self.mostNGenderVar, value=1) 
 		self.mostNGenderWRadiobutton.pack()
 
-
-		self.mostNStartYearSpinbox = tk.Spinbox(sub, from_=2000, to=2021,state = 'readonly')
+		currentYear = t.Date.Today().year
+		self.mostNStartYearSpinbox = tk.Spinbox(sub, from_=2000, to=currentYear,state = 'readonly')
 		self.mostNStartYearSpinbox.pack()
 
 		
-		self.mostNEndYearSpinbox = tk.Spinbox(sub, from_= 2000, to=2021,state = 'readonly')
+		self.mostNEndYearSpinbox = tk.Spinbox(sub, from_= 2000, to=currentYear,state = 'readonly')
 		self.mostNEndYearSpinbox.pack()
 
 
@@ -237,12 +237,13 @@ class MainMenu(tk.Tk):
 		self.mostNTeamGenderARadiobutton = tk.Radiobutton(sub, text="Mixed", variable=self.mostNTeamGenderVar, value=2) 
 		self.mostNTeamGenderARadiobutton.pack()
 
+		currentYear = t.Date.Today().year
 
-		self.mostNTeamStartYearSpinbox = tk.Spinbox(sub, from_=2000, to=2021,state = 'readonly')
+		self.mostNTeamStartYearSpinbox = tk.Spinbox(sub, from_=2000, to= currentYear,state = 'readonly')
 		self.mostNTeamStartYearSpinbox.pack()
 
 		
-		self.mostNTeamEndYearSpinbox = tk.Spinbox(sub, from_= 2000, to=2021,state = 'readonly')
+		self.mostNTeamEndYearSpinbox = tk.Spinbox(sub, from_= 2000, to= currentYear,state = 'readonly')
 		self.mostNTeamEndYearSpinbox.pack()
 
 
@@ -275,7 +276,7 @@ class MainMenu(tk.Tk):
 	def GraphHomeAwayExec(self):
 		name = self.awayNamebox.get("1.0",tk.END).strip()
 		surname = self.awaySurnamebox.get("1.0",tk.END).strip()
-		fisCode = op.Athlete.GetAthleteFisByName(self.athletes,self.awayNamebox.get("1.0",tk.END),self.awaySurnamebox.get("1.0",tk.END))
+		fisCode = op.Athlete.GetAthleteFisByName(self.athletes,self.name,surname)
 
 		if fisCode == None:
 			tk.messagebox.showwarning("Warning",f"Name {name} {surname} not found!")
@@ -283,10 +284,6 @@ class MainMenu(tk.Tk):
 			athlete = self.athletes[self.fisCodeMap[fisCode]]
 			xAxis,yAxis = op.CompetitionsAtHomeVsForeign(athlete)
 			charts.LineChart(xAxis,yAxis,f"Relative rank of {athlete.name} {athlete.surname} over his career","Time","Relative rank",["Home","Away"])
-
-
-			
-		
 
 
 	def TopTeamCountry(self):
@@ -321,12 +318,12 @@ class MainMenu(tk.Tk):
 		self.topTeamGenderARadiobutton = tk.Radiobutton(sub, text="Mixed", variable=self.topTeamGenderVar, value=2) 
 		self.topTeamGenderARadiobutton.pack()
 
-
-		self.topTeamStartYearSpinbox = tk.Spinbox(sub, from_=2000, to=2021,state = 'readonly')
+		currentYear = t.Date.Today().year
+		self.topTeamStartYearSpinbox = tk.Spinbox(sub, from_=2000, to=currentYear,state = 'readonly')
 		self.topTeamStartYearSpinbox.pack()
 
 		
-		self.topTeamEndYearSpinbox = tk.Spinbox(sub, from_= 2000, to=2021,state = 'readonly')
+		self.topTeamEndYearSpinbox = tk.Spinbox(sub, from_= 2000, to=currentYear,state = 'readonly')
 		self.topTeamEndYearSpinbox.pack()
 
 
@@ -337,16 +334,50 @@ class MainMenu(tk.Tk):
 
 
 
-
 		if int(self.topTeamEndYearSpinbox.get()) < int(self.topTeamStartYearSpinbox.get()): #popravimo meje
 			tk.messagebox.showwarning(title='Warning', message='Selected start year must be below selected end year.', **options)
 
 	def DisplaySoloResults(self):
-		pass
+		sub = tk.Toplevel(self)
+		sub.wm_title("Solo results")
+		sub.resizable(False,False)
+		sub.geometry("400x400")
 
+		self.soloResultsNamebox = tk.Text(sub,height = 1,width = 25)
+		self.soloResultsSurnamebox = tk.Text(sub,height = 1,width = 25)
+		self.soloResultsNamebox.pack()
+		self.soloResultsSurnamebox.pack()
+
+		currentYear = t.Date.Today().year
+		self.soloResultsStartYearSpin = tk.Spinbox(sub, from_= 2000, to= currentYear,state = 'readonly')
+		self.soloResultsEndYearSpin = tk.Spinbox(sub, from_= 2000, to= currentYear,state = 'readonly')
+		self.soloResultsStartYearSpin.pack()
+		self.soloResultsEndYearSpin.pack()
+
+		self.soloResultsButtonExec = tk.Button(sub,text = "Show results",command = self.DisplaySoloResultsExec)
 
 	def DisplaySoloResultsExec(self):
-		pass
+		name = self.soloResultsNamebox.get("1.0",tk.END).strip()
+		surname = self.soloResultsSurnamebox.get("1.0",tk.END).strip()
+		fisCode = op.Athlete.GetAthleteFisByName(self.athletes,name,surname)
+
+		startYear = int(self.soloResultsStartYearSpin)
+		endYear = int(self.soloResultsEndYearSpin)
+
+		if fisCode == None:
+			tk.messagebox.showwarning("Warning",f"Name {name} {surname} not found!")
+		elif endYear < startYear:
+			tk.messagebox.showwarning("Warning","Selected start year must be below selected end year.")
+		else:
+			athlete = athletes[fisCodeMap[fisCode]]
+
+			soloResults = []
+			for perseonalResult in athlete.personalResults:
+				if len(perseonalResult) == 3:
+					soloResults.append(perseonalResult)
+
+			# todo
+
 
 	def DisplayTeamResults(self):
 		pass
@@ -355,7 +386,52 @@ class MainMenu(tk.Tk):
 		pass
 
 	def GraphNumMedalsSolo(self):
-		pass
+		sub = tk.Toplevel(self)
+		sub.wm_title("Solo results")
+		sub.resizable(False,False)
+		sub.geometry("400x400")
+
+		self.numMedalsSoloNamebox = tk.Text(sub,height = 1,width = 25)
+		self.numMedalsSoloSurnamebox = tk.Text(sub,height = 1,width = 25)
+		self.numMedalsSoloNamebox.pack()
+		self.numMedalsSoloSurnamebox.pack()
+
+		self.numMedalsSoloButtonExec = tk.Button(sub,text = "Show results",command = self.GraphNumMedalsSoloExec)
+		self.numMedalsSoloButtonExec.pack()
+	
+	def GraphNumMedalsSoloExec(self):
+		name = self.numMedalsSoloNamebox.get("1.0",tk.END).strip()
+		surname = self.numMedalsSoloSurnamebox.get("1.0",tk.END).strip()
+		fisCode = op.Athlete.GetAthleteFisByName(self.athletes,name,surname)
+
+		if fisCode == None:
+			tk.messagebox.showwarning("Warning",f"Name {name} {surname} not found!")
+		else:
+			athlete = self.athletes[self.fisCodeMap[fisCode]]
+			yearsCompeted = set()
+			for result in athlete.personalResults:
+				if len(result) == 3:
+					i,j,k = result
+					yearsCompeted.add(athlete.events[i].competitions[j].date.year)
+
+
+			minYear = min(yearsCompeted)
+			maxYear = max(yearsCompeted)
+
+			xAxis = list(range(minYear,maxYear + 1))
+			yAxis = [[0,0,0] for _ in range(len(xAxis))]
+			for i in range(len(xAxis)):
+				year = xAxis[i]
+				for result in athlete.personalResults:
+					if len(result) == 3:
+						if athlete.events[result[0]].competitions[result[1]].date.year == year:
+							rank = result[2] + 1
+							
+							if 1 <= rank <= 3:
+								yAxis[i][rank - 1] += 1
+
+			charts.BarChart(xAxis,tuple(yAxis),f"Medals of {athlete.name} {athlete.surname} in their career","Year","Number of medals",["Gold","Silver","Bronze"],["gold","silver","#CD7F32"])
+		
 
 	def GraphNumMedalsTeam(self):
 		pass
