@@ -220,7 +220,7 @@ class MainMenu(tk.Tk):
 
 		hillSizeHeight = int(self.simHillSizeHeightSpin.get())
 
-		competitoionCountry = self.self.simCompetitionCountryCombobox.get()
+		competitoionCountry = self.simCompetitionCountryCombobox.get()
 
 		startYear = int(self.simStartYearSpin.get())
 		endYear = int(self.simEndYearSpin.get())
@@ -241,7 +241,7 @@ class MainMenu(tk.Tk):
 
 
 	def MostNthPlacesSolo(self):
-		self.simWindow = tk.Toplevel(self)
+		sub = tk.Toplevel(self)
 		sub.wm_title("Most solo n-th places")
 		sub.resizable(False,False)
 		sub.geometry("400x400")
@@ -403,12 +403,12 @@ class MainMenu(tk.Tk):
 
 		countries = sorted(['GER','AUT','JPN','FIN','NOR','POL','SLO','CZE','RUS','SUI'])
 
-		self.topTeamCountrylabel = tk.Label(sub,text = 'Country:')
+		self.topTeamCountrylabel = tk.Label(self.topTeamWindow,text = 'Country:')
 		self.topTeamCountrylabel.pack()
 		self.topTeamCountryCombobox= ttk.Combobox(self.topTeamWindow,values = countries,state = 'readonly')
 		self.topTeamCountryCombobox.pack()
 		
-		self.topTeamHillSizelabel = tk.Label(sub,text = 'Hill sizes:')
+		self.topTeamHillSizelabel = tk.Label(self.topTeamWindow,text = 'Hill sizes:')
 		self.topTeamHillSizelabel.pack()
 
 		self.topTeamHillSizeVar = tk.IntVar()
@@ -419,7 +419,7 @@ class MainMenu(tk.Tk):
 		self.topTeamHillSizeFH = tk.Radiobutton(self.topTeamWindow, text="Flying hill", variable=self.topTeamHillSizeVar, value=2)
 		self.topTeamHillSizeFH.pack()
 
-		self.topGenderlabel = tk.Label(sub,text = 'Gender:')
+		self.topGenderlabel = tk.Label(self.topTeamWindow,text = 'Gender:')
 		self.topGenderlabel.pack()
 		self.topTeamGenderVar = tk.IntVar()
 		self.topTeamGenderMRadiobutton = tk.Radiobutton(self.topTeamWindow, text="Male", variable=self.topTeamGenderVar, value=0)
@@ -431,13 +431,13 @@ class MainMenu(tk.Tk):
 		self.topTeamGenderARadiobutton = tk.Radiobutton(self.topTeamWindow, text="Mixed", variable=self.topTeamGenderVar, value=2) 
 		self.topTeamGenderARadiobutton.pack()
 
-		self.loweryearlabel = tk.Label(sub,text = 'From:')
+		self.loweryearlabel = tk.Label(self.topTeamWindow,text = 'From:')
 		self.loweryearlabel.pack()
 		currentYear = t.Date.Today().year
 		self.topTeamStartYearSpinbox = tk.Spinbox(self.topTeamWindow, from_=2000, to=currentYear,state = 'readonly')
 		self.topTeamStartYearSpinbox.pack()
 
-		self.upperyearlabel = tk.Label(sub,text = 'To:')
+		self.upperyearlabel = tk.Label(self.topTeamWindow,text = 'To:')
 		self.upperyearlabel.pack()
 		self.topTeamEndYearSpinbox = tk.Spinbox(self.topTeamWindow, from_= 2000, to=currentYear,state = 'readonly')
 		self.topTeamEndYearSpinbox.pack()
@@ -456,11 +456,11 @@ class MainMenu(tk.Tk):
 		endYear = int(self.topTeamEndYearSpinbox.get())
 
 		if endYear < startYear: #popravimo meje
-			tk.messagebox.showwarning(title='Warning', message='Selected start year must be below selected end year!', **options)
+			tk.messagebox.showwarning('Warning','Selected start year must be below selected end year!')
 		else:
 			tabFisCodes = op.TeamAthletesPrediction(self.athletes,country,hillSizeName,startYear,endYear,gender)
 			if len(tabFisCodes) < 4:
-				tk.messagebox.showwarning(title='Warning', message='There is not enough competitors to foram a team!', **options)
+				tk.messagebox.showwarning('Warning','There is not enough competitors to foram a team!')
 			else:
 				tabAthletes = []
 				for i in range(len(tabFisCodes)):
@@ -813,7 +813,7 @@ class MainMenu(tk.Tk):
 			print(tabAverageTotalPoints2)
 
 
-			charts.LineChart(x,(tabAverageTotalPoints1,tabAverageTotalPoints2),f'Comparison between {athlete1.name} {athlete2.surname} and {athlete2.name} {athlete2.surname}','Year','Average total points',[athlete2.surname,athlete2.surname])
+			charts.LineChart(x,(tabAverageTotalPoints1,tabAverageTotalPoints2),f'Comparison between {athlete1.name} {athlete1.surname} and {athlete2.name} {athlete2.surname}','Year','Average total points',[athlete1.surname,athlete2.surname])
 
 
 
