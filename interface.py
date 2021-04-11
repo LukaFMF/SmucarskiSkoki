@@ -357,12 +357,12 @@ class MainMenu(tk.Tk):
 
 		countries = sorted(['GER','AUT','JPN','FIN','NOR','POL','SLO','CZE','RUS','SUI'])
 
-		self.topTeamCountrylabel = tk.Label(sub,text = 'Country:')
+		self.topTeamCountrylabel = tk.Label(self.topTeamWindow,text = 'Country:')
 		self.topTeamCountrylabel.pack()
 		self.topTeamCountryCombobox= ttk.Combobox(self.topTeamWindow,values = countries,state = 'readonly')
 		self.topTeamCountryCombobox.pack()
 		
-		self.topTeamHillSizelabel = tk.Label(sub,text = 'Hill sizes:')
+		self.topTeamHillSizelabel = tk.Label(self.topTeamWindow,values,text = 'Hill sizes:')
 		self.topTeamHillSizelabel.pack()
 
 		self.topTeamHillSizeVar = tk.IntVar()
@@ -373,7 +373,7 @@ class MainMenu(tk.Tk):
 		self.topTeamHillSizeFH = tk.Radiobutton(self.topTeamWindow, text="Flying hill", variable=self.topTeamHillSizeVar, value=2)
 		self.topTeamHillSizeFH.pack()
 
-		self.topGenderlabel = tk.Label(sub,text = 'Gender:')
+		self.topGenderlabel = tk.Label(self.topTeamWindow,values,text = 'Gender:')
 		self.topGenderlabel.pack()
 		self.topTeamGenderVar = tk.IntVar()
 		self.topTeamGenderMRadiobutton = tk.Radiobutton(self.topTeamWindow, text="Male", variable=self.topTeamGenderVar, value=0)
@@ -385,13 +385,13 @@ class MainMenu(tk.Tk):
 		self.topTeamGenderARadiobutton = tk.Radiobutton(self.topTeamWindow, text="Mixed", variable=self.topTeamGenderVar, value=2) 
 		self.topTeamGenderARadiobutton.pack()
 
-		self.loweryearlabel = tk.Label(sub,text = 'From:')
+		self.loweryearlabel = tk.Label(self.topTeamWindow,text = 'From:')
 		self.loweryearlabel.pack()
 		currentYear = t.Date.Today().year
 		self.topTeamStartYearSpinbox = tk.Spinbox(self.topTeamWindow, from_=2000, to=currentYear,state = 'readonly')
 		self.topTeamStartYearSpinbox.pack()
 
-		self.upperyearlabel = tk.Label(sub,text = 'To:')
+		self.upperyearlabel = tk.Label(self.topTeamWindow,text = 'To:')
 		self.upperyearlabel.pack()
 		self.topTeamEndYearSpinbox = tk.Spinbox(self.topTeamWindow, from_= 2000, to=currentYear,state = 'readonly')
 		self.topTeamEndYearSpinbox.pack()
