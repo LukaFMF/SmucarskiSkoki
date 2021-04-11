@@ -76,7 +76,7 @@ def CompetitionsAtHomeVsForeign(athlete):
 
 	return timestamps,values
 
-excludedCategories = ("QUA","JUN","CHI","OPA","WJC","EYOF","YOG") # izlocimo kategorije, ki jih ne zelimo upostevati
+excludedCategories = ("QUA","JUN","CHI","OPA","WJC","EYOF","YOG",'FC','UVS') # izlocimo kategorije, ki jih ne zelimo upostevati
 
 def SimulateTeamCompetition(athletes,fisCodeMap,teamCountries,hillSizeName,hillSizeHeight,competitionCountry,startYear = 2020,endYear = 2021,gender = "M"):
 	teams = []
@@ -206,6 +206,44 @@ def MostNRanks(athletes,n,startYear,endYear = None,gender = None):
 	return tabMostNs,mostNs
 	
 
+def MostNRanksTeam(athletes,n,startYear,endYear = None,gender = None):
+	if endYear == None:
+		endYear = startYear
+
+	if gender == None:
+		gender = "MWA"
+
+	fisCodeAndNumNOfATeam = dict()
+	for year in range(startYear,endYear + 1):
+		for athlete in athletes:
+			for result in athlete.personalResults:
+				if len(result) == 4: # upoštevamo le ekipne tekme
+					i,j,k,l = result
+					if (k + 1 == n and 
+						athlete.events[i].competitions[j].gender in gender and 
+						athlete.events[i].competitions[j].date.year == year and
+						athlete.events[i].competitions[j].category not in excludedCategories):
+						#athlete.events[i].competitions[j].results[k].results[l]
+						if athlete.country in fisCodeAndNumNOfATeam:
+							fisCodeAndNumNOfATeam[athlete.country] += 1
+						else:
+							fisCodeAndNumNOfATeam[athlete.country] = 1
+	
+	mostNs = max(fisCodeAndNumNOfATeam.values())
+	
+	tabMostNs = []
+	
+	for country,numN in fisCodeAndNumNOfATeam.items():
+		if numN == mostNs:
+			tabMostNs.append(country)
+	return tabMostNs,mostNs
+
+
+
+
+
+
+
 def athleteResults(events):
 	athletes = []
 	fisCodesToIndex = {}
@@ -220,7 +258,7 @@ def athleteResults(events):
 					else:
 						fisCodesToIndex[result.fisCode] = len(athletes)
 						athletes.append(Athlete(result.fisCode,result.name,result.surname,result.birthYear,result.country,events))
-						athletes[-1].personalResults.append((i,j,k)) # i je indeks v tabeli rezutatov tekmovanja
+						athletes[-1].personalResults.append((i,j,k)) # k je indeks v tabeli rezutatov tekmovanja
 			else: # result at a team competition is a 4-tuple
 				for k,teamResult in enumerate(competition.results):
 					for l,individualResult in enumerate(teamResult.results):
@@ -230,7 +268,7 @@ def athleteResults(events):
 						else:
 							fisCodesToIndex[individualResult.fisCode] = len(athletes)
 							athletes.append(Athlete(individualResult.fisCode,individualResult.name,individualResult.surname,individualResult.birthYear,individualResult.country,events))
-							athletes[-1].personalResults.append((i,j,k,l)) # i je indeks v tabeli rezutatov tekmovanja
+							athletes[-1].personalResults.append((i,j,k,l)) # k je indeks v tabeli rezutatov tekmovanja
 	return athletes,fisCodesToIndex
 
 class Athlete:
