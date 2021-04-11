@@ -114,54 +114,56 @@ class MainMenu(tk.Tk):
 			button.pack()
 			self.mainMenuLabelsAndButtons.append((label,button))
 
-	# def ShowTeamCompetition(self,master,teamComp):
-	# 	sub = tk.Toplevel(master)
-	# 	sub.wm_title("Simulation results")
-	# 	sub.resizable(False,False)
-	# 	#sub.geometry("400x400")
+	def ShowTeamCompetition(self,master,teamComp):
+		sub = tk.Toplevel(master)
+		sub.wm_title("Simulation results")
+		sub.resizable(False,False)
+		#sub.geometry("400x400")
 
-	# 	header = ("Rank","Country","Fis code","Name","Surname","Distance 1","Points 1","Distance 2","Points 2","Total points")
+		header = ("Rank","Country","Fis code","Name","Surname","Points 1","Points 2","Total points")
 
-	# 	rows = [header]
+		rows = [header]
 
-	# 	for i,teamRes in enumerate(teamComp.results):
-	# 		resultRow = []
+		for i,teamRes in enumerate(teamComp.results):
+			resultRow = []
 
-	# 		rank = i + 1
-	# 		resultRow.append(rank)
-	# 		country = teamRes.country
-	# 		resultRow.append(country)
-	# 		totalPoints = teamRes.totalPoints
+			rank = i + 1
+			resultRow.append(str(rank))
+			country = teamRes.country
+			resultRow.append(country)
 
-	# 		for result in teamRes.results:
-	# 			fisCode = result.fisCode
-	# 			resultRow.append(fisCode)
+			resultRow.extend(["","","","",""]) # fiscode, name, surname,  points1,  points2
+			totalPoints = teamRes.totalPoints
+			resultRow.append(f"{totalPoints:.1f}")
 
-	# 			name = result.name
-	# 			resultRow.append(name)
+			rows.append(resultRow)
 
-	# 			surname = result.surname
-	# 			resultRow.append(surname)
+			for result in teamRes.results:
+				resultRow = []
+				resultRow.extend(["",""])
+				fisCode = result.fisCode
+				resultRow.append(f"{fisCode}")
 
-	# 			distance1 = result.distance1
-	# 			resultRow.append(distance1)
+				name = result.name
+				resultRow.append(name)
 
-	# 			points1 = result.points1
-	# 			resultRow.append(points1)
+				surname = result.surname
+				resultRow.append(surname)
 
-	# 			distance2 = result.distance2
-	# 			resultRow.append(distance2)
+				points1 = result.points1
+				resultRow.append(f"{points1:.1f}")
 
-	# 			points2 = result.points2
-	# 			resultRow.append(points2)
+				points2 = result.points2
+				resultRow.append(f"{points2:.1f}")
 			
-	# 			resultRow.append(totalPoints)
+				resultRow.append("")
+				rows.append(resultRow)
 
-	# 		for i in range(len(rows)):
-	# 			for j in range(len(rows[0])):
-	# 				self.soloResultEntry = tk.Entry(sub, width=20)
-	# 				self.soloResultEntry.grid(row = i,column = j)
-	# 				self.soloResultEntry.insert(tk.END,rows[i][j])
+			for i in range(len(rows)):
+				for j in range(len(rows[0])):
+					self.soloResultEntry = tk.Entry(sub, width=20)
+					self.soloResultEntry.grid(row = i,column = j)
+					self.soloResultEntry.insert(tk.END,rows[i][j])
 
 	
 	def Simulation(self):
@@ -214,29 +216,30 @@ class MainMenu(tk.Tk):
 		for inx in self.simCountryListbox.curselection():
 			selectedCountries.append(countries[inx])
 
-		hillSizeName = RadioInxToHillRating(self.simHillSizeName)
+		hillSizeName = RadioInxToHillRating(self.simHillSizeName.get())
 
 		gender = RadioInxToGender(self.simGender.get())
 
 		hillSizeHeight = int(self.simHillSizeHeightSpin.get())
 
-		competitoionCountry = self.simCompetitionCountryCombobox.get()
+		competitionCountry = self.simCompetitionCountryCombobox.get()
 
 		startYear = int(self.simStartYearSpin.get())
 		endYear = int(self.simEndYearSpin.get())
-		if IsHillHeightValid(hillSizeName,hillSizeHeight):
+		if not IsHillHeightValid(hillSizeName,hillSizeHeight):
 			if hillSizeName == "NH":
-				tk.messagebox.showwarning('Warning','Selected for large hill, hill height must be between 85 and 109!')
+				tk.messagebox.showwarning('Warning','If normal hill is selected, hill height must be between 85 and 109!')
 			elif hillSizeName == "LH":
-				tk.messagebox.showwarning('Warning','Selected for large hill, hill height must be between 110 and 184!')
+				tk.messagebox.showwarning('Warning','If large hill is selected, hill height must be between 110 and 184!')
 			else:
-				tk.messagebox.showwarning('Warning','Selected for flying hill, hill height must be 185 or above!')
+				tk.messagebox.showwarning('Warning','If flying hill is selected, hill height must be 185 or above!')
 		elif endYear < startYear:
 			tk.messagebox.showwarning('Warning','Selected start year must be below selected end year!')
 		elif len(selectedCountries) == 0:
 			tk.messagebox.showwarning('Warning','You must select at least one competitor country!')
 		else:
-			teamCompetition = SimulateTeamCompetition(self.athletes,self.fisCodeMap,selectedCountries,hillSizeName,hillSizeHeight,competitionCountry,startYear,endYear,gender)
+			teamCompetition = op.SimulateTeamCompetition(self.athletes,self.fisCodeMap,selectedCountries,hillSizeName,hillSizeHeight,competitionCountry,startYear,endYear,gender)
+			teamCompetition = op.SimulateTeamCompetition(self.athletes,self.fisCodeMap,selectedCountries,hillSizeName,hillSizeHeight,competitionCountry,startYear,endYear,gender)
 			self.ShowTeamCompetition(self.simWindow,teamCompetition)
 
 
