@@ -177,6 +177,7 @@ class MainMenu(tk.Tk):
 		for country in countries:
 			self.simCountryListbox.insert(tk.END,country)
 
+		
 		self.simHillSizeName = tk.IntVar(self.simWindow,0)
 		self.simHillSizeNameNHRadio = tk.Radiobutton(self.simWindow,text = "Normal hill",variable = self.simHillSizeName,value = 0) # 85–109
 		self.simHillSizeNameLHRadio = tk.Radiobutton(self.simWindow,text = "Large hill",variable = self.simHillSizeName,value = 1) # 110–184
