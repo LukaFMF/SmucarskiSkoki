@@ -293,3 +293,15 @@ class Athlete:
 				ret += f"\tRank: {t.ToOrdinalStr(teamPlaceInx + 1)} place\n"
 				ret += f"{self.events[eventInx].competitions[compInx].results[teamPlaceInx].results[teamTabInx]}\n"
 		return ret
+	
+	@staticmethod
+	def GetAthleteFisByName(athletes,name,surname):
+		name = name.strip().lower()
+		surname = surname.strip().lower()
+
+		for athlete in athletes:
+			if name == athlete.name.strip().lower() and surname == athlete.surname.strip().lower():
+				return athlete.fisCode
+
+		return None
+

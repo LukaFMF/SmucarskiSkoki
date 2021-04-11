@@ -1,6 +1,7 @@
 import tkinter as tk
 import tkinter.ttk as ttk
-import tools as t, time, datetime,obdelava_podatkov as op
+from tkinter import messagebox
+import tools as t, time, datetime,obdelava_podatkov as op,charts
 from math import sin,pi
 
 
@@ -59,7 +60,7 @@ class MainMenu(tk.Tk):
 			loadingDescriptionText.set(eventInfoText.format(min(i + 1,numEvents)))
 			self.update_idletasks()
 
-		self.ahtletes,self.fisCodeMap = op.athleteResults(self.events)
+		self.athletes,self.fisCodeMap = op.athleteResults(self.events)
 
 		self.downloadInfo.destroy()
 		self.progressBar.destroy()
@@ -141,19 +142,44 @@ class MainMenu(tk.Tk):
 		for country in countries:
 			self.simCountryListbox.insert(tk.END,country)
 
-		self.simHillSizeName = tk.IntVar(0)
-		self.simHillSizeNameNHRadio
+		self.simHillSizeName = tk.IntVar(sub,0)
+		self.simHillSizeNameNHRadio = tk.Radiobutton(sub,text = "Normal hill",variable = self.simHillSizeName,value = 0) # 85–109
+		self.simHillSizeNameLHRadio = tk.Radiobutton(sub,text = "Large hill",variable = self.simHillSizeName,value = 1) # 110–184
+		self.simHillSizeNameFHRadio = tk.Radiobutton(sub,text = "Flying hill",variable = self.simHillSizeName,value = 2) # > 185
+		self.simHillSizeNameNHRadio.pack()
+		self.simHillSizeNameLHRadio.pack()
+		self.simHillSizeNameFHRadio.pack()
+
+		self.simHillSizeHeightSpin = tk.Spinbox(sub,state = "readonly",increment = 5,from_ = 85,to = 240)
+		self.simHillSizeHeightSpin.pack()
+
+		self.simCompetitionCountryCombobox = ttk.Combobox(sub,state="readonly",values = countries)
+		self.simCompetitionCountryCombobox.pack()
+
+		self.simGender = tk.IntVar(sub,0)
+		self.simGenderMRadio = tk.Radiobutton(sub,text = "M",variable = self.simGender,value = 0)
+		self.simGenderWRadio = tk.Radiobutton(sub,text = "W",variable = self.simGender,value = 1)
+		self.simGenderMRadio.pack()
+		self.simGenderWRadio.pack()
+
+		currentYear = t.Date.Today().year
+		self.simStartYearSpin = tk.Spinbox(sub,state = "readonly",from_ = 2000,to = currentYear)
+		self.simEndYearSpin = tk.Spinbox(sub,state = "readonly",from_ = 2000,to = currentYear)
+		self.simStartYearSpin.pack()
+		self.simEndYearSpin.pack()
 
 
-
-
-		self.execSimulationBtn = tk.Button(sub,text = 'Show results',command = self.Simulate)
+		self.execSimulationBtn = tk.Button(sub,text = 'Show results',command = self.SimulationExec)
 		self.execSimulationBtn.pack()
 
 		#teamCountries,hillSizeName,hillSizeHeight,competitionCountry,startYear = 2020,endYear = 2021,gender = "M"
 
-	def Simulate(self):
+	def SimulationExec(self):
 		print(self.simCountryListbox.curselection())
+		print(self.simCompetitionCountry.get())
+		print(int(self.simHillSizeHeightSpin .get()))
+		print(int(self.simStartYearSpin.get()))
+		print(int(self.simEndYearSpin.get()))
 
 
 		
@@ -167,7 +193,36 @@ class MainMenu(tk.Tk):
 		pass
 
 	def GraphHomeAway(self):
-		pass
+		sub = tk.Toplevel(self)
+		sub.wm_title("Home and away")
+		sub.resizable(False,False)
+		sub.geometry("400x400")
+
+		self.awayNamebox = tk.Text(sub,height = 1,width = 25)
+		self.awaySurnamebox = tk.Text(sub,height = 1,width = 25)
+		self.awayNamebox.pack()
+		self.awaySurnamebox.pack()
+
+		self.awayButtonExec = tk.Button(sub,text = "Show results",command = self.GraphHomeAwayExec)
+		self.awayButtonExec.pack()
+
+
+	def GraphHomeAwayExec(self):
+		name = self.awayNamebox.get("1.0",tk.END).strip()
+		surname = self.awaySurnamebox.get("1.0",tk.END).strip()
+		fisCode = op.Athlete.GetAthleteFisByName(self.athletes,self.awayNamebox.get("1.0",tk.END),self.awaySurnamebox.get("1.0",tk.END))
+
+		if fisCode == None:
+			tk.messagebox.showwarning("Warning",f"Name {name} {surname} not found!")
+		else:
+			athlete = self.athletes[self.fisCodeMap[fisCode]]
+			xAxis,yAxis = op.CompetitionsAtHomeVsForeign(athlete)
+			charts.LineChart(xAxis,yAxis,f"Relative rank of {athlete.name} {athlete.surname} over his career","Time","Relative rank",["Home","Away"])
+
+
+			
+		
+
 
 	def TopTeamCountry(self):
 		pass
