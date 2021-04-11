@@ -114,96 +114,134 @@ class MainMenu(tk.Tk):
 			button.pack()
 			self.mainMenuLabelsAndButtons.append((label,button))
 
-		# self.simLabel = tk.Label(text = "Simulate team competition:")
-		# self.simBtn = tk.Button(self,text = "Open",command = self.Simulation)
-		# self.simLabel.pack(pady = paddingY)
-		# self.simBtn.pack()
+	# def ShowTeamCompetition(self,master,teamComp):
+	# 	sub = tk.Toplevel(master)
+	# 	sub.wm_title("Simulation results")
+	# 	sub.resizable(False,False)
+	# 	#sub.geometry("400x400")
 
-		# self.mostNRanksSoloLabel = tk.Label(text = "Display athlete with most n-th places:")
-		# self.mostNRanksSoloBtn = tk.Button(self,text='Open',command = self.MostNthPlacesSolo)
-		# self.mostNRanksSoloLabel.pack(pady = paddingY)
-		# self.mostNRanksSoloBtn.pack()
+	# 	header = ("Rank","Country","Fis code","Name","Surname","Distance 1","Points 1","Distance 2","Points 2","Total points")
 
-		# self.mostNRanksTeamLabel = tk.Label(self,text = "Display country with most n-th places")
-		# self.mostNRanksTeamBtn = tk.Button(self,text="Open",command = self.MostNthPlacesTeam)
-		# self.mostNRanksTeamLabel.pack(pady = paddingY)
-		# self.mostNRanksTeamBtn.pack()
+	# 	rows = [header]
 
-		# self.homeAndAwayLabel = tk.Label(self,text = "Graph rank of a competition at home and away")
-		# self.homeAndAwayBtn = tk.Button(self,text = "Open",command = self.GraphHomeAway)
-		# self.homeAndAwayLabel.pack(pady = paddingY)
-		# self.homeAndAwayBtn.pack()
+	# 	for i,teamRes in enumerate(teamComp.results):
+	# 		resultRow = []
 
-		# self.topTeamInCountryLabel = tk.Label(self,text = "Display country\'s best team based on solo results")
-		# self.topTeamInCountryBtn = tk.Button(self,text = "Open",command = self.TopTeamCountry)
-		# self.topTeamInCountryLabel.pack(pady = paddingY)
-		# self.topTeamInCountryBtn.pack()
+	# 		rank = i + 1
+	# 		resultRow.append(rank)
+	# 		country = teamRes.country
+	# 		resultRow.append(country)
+	# 		totalPoints = teamRes.totalPoints
 
-		# self.allSoloResultsBtn = tk.Button(self,text='Display all solo results of an athlete',command = self.DisplaySoloResults)
+	# 		for result in teamRes.results:
+	# 			fisCode = result.fisCode
+	# 			resultRow.append(fisCode)
 
-		# self.allTeamResultsBtn = tk.Button(self,text='Display all team results of a country',command = self.DisplayTeamResults)
+	# 			name = result.name
+	# 			resultRow.append(name)
 
-		# self.podiumBarChartSoloBtn = tk.Button(self,text='Graph number of medals for an athlete over the years',command = self.GraphNumMedalsSolo)
+	# 			surname = result.surname
+	# 			resultRow.append(surname)
 
-		# self.podiumBarChartTeamBtn = tk.Button(self,text='Graph number of medals for a country over the years',command = self.GraphNumMedalsTeam)
+	# 			distance1 = result.distance1
+	# 			resultRow.append(distance1)
 
-		# self.compareAthletesBtn = tk.Button(self,text='Compare average total scores of two athletes',command = self.CompareTotalScores)
+	# 			points1 = result.points1
+	# 			resultRow.append(points1)
 
-		
+	# 			distance2 = result.distance2
+	# 			resultRow.append(distance2)
+
+	# 			points2 = result.points2
+	# 			resultRow.append(points2)
+			
+	# 			resultRow.append(totalPoints)
+
+	# 		for i in range(len(rows)):
+	# 			for j in range(len(rows[0])):
+	# 				self.soloResultEntry = tk.Entry(sub, width=20)
+	# 				self.soloResultEntry.grid(row = i,column = j)
+	# 				self.soloResultEntry.insert(tk.END,rows[i][j])
+
+	
 	def Simulation(self):
-		sub = tk.Toplevel(self)
-		sub.wm_title("Simulation")
-		sub.resizable(False,False)
-		sub.geometry("400x400")
+		self.simWindow = tk.Toplevel(self)
+		self.simWindow.wm_title("Simulation")
+		self.simWindow.resizable(False,False)
+		self.simWindow.geometry("400x400")
 
 		countries = sorted(['GER','AUT','JPN','FIN','NOR','POL','SLO','CZE','RUS','SUI'])
 
-		self.simCountryListbox = tk.Listbox(sub,selectmode = "multiple")
+		self.simCountryListbox = tk.Listbox(self.simWindow,selectmode = "multiple")
 		self.simCountryListbox.pack()
 		for country in countries:
 			self.simCountryListbox.insert(tk.END,country)
 
-		self.simHillSizeName = tk.IntVar(sub,0)
-		self.simHillSizeNameNHRadio = tk.Radiobutton(sub,text = "Normal hill",variable = self.simHillSizeName,value = 0) # 85–109
-		self.simHillSizeNameLHRadio = tk.Radiobutton(sub,text = "Large hill",variable = self.simHillSizeName,value = 1) # 110–184
-		self.simHillSizeNameFHRadio = tk.Radiobutton(sub,text = "Flying hill",variable = self.simHillSizeName,value = 2) # > 185
+		self.simHillSizeName = tk.IntVar(self.simWindow,0)
+		self.simHillSizeNameNHRadio = tk.Radiobutton(self.simWindow,text = "Normal hill",variable = self.simHillSizeName,value = 0) # 85–109
+		self.simHillSizeNameLHRadio = tk.Radiobutton(self.simWindow,text = "Large hill",variable = self.simHillSizeName,value = 1) # 110–184
+		self.simHillSizeNameFHRadio = tk.Radiobutton(self.simWindow,text = "Flying hill",variable = self.simHillSizeName,value = 2) # > 185
 		self.simHillSizeNameNHRadio.pack()
 		self.simHillSizeNameLHRadio.pack()
 		self.simHillSizeNameFHRadio.pack()
 
-		self.simHillSizeHeightSpin = tk.Spinbox(sub,state = "readonly",increment = 5,from_ = 85,to = 240)
+		self.simHillSizeHeightSpin = tk.Spinbox(self.simWindow,state = "readonly",increment = 5,from_ = 85,to = 240)
 		self.simHillSizeHeightSpin.pack()
 
-		self.simCompetitionCountryCombobox = ttk.Combobox(sub,state="readonly",values = countries)
+		self.simCompetitionCountryCombobox = ttk.Combobox(self.simWindow,state="readonly",values = countries)
 		self.simCompetitionCountryCombobox.pack()
 
-		self.simGender = tk.IntVar(sub,0)
-		self.simGenderMRadio = tk.Radiobutton(sub,text = "M",variable = self.simGender,value = 0)
-		self.simGenderWRadio = tk.Radiobutton(sub,text = "W",variable = self.simGender,value = 1)
+		self.simGender = tk.IntVar(self.simWindow,0)
+		self.simGenderMRadio = tk.Radiobutton(self.simWindow,text = "M",variable = self.simGender,value = 0)
+		self.simGenderWRadio = tk.Radiobutton(self.simWindow,text = "W",variable = self.simGender,value = 1)
 		self.simGenderMRadio.pack()
 		self.simGenderWRadio.pack()
 
 		currentYear = t.Date.Today().year
-		self.simStartYearSpin = tk.Spinbox(sub,state = "readonly",from_ = 2000,to = currentYear)
-		self.simEndYearSpin = tk.Spinbox(sub,state = "readonly",from_ = 2000,to = currentYear)
+		self.simStartYearSpin = tk.Spinbox(self.simWindow,state = "readonly",from_ = 2000,to = currentYear)
+		self.simEndYearSpin = tk.Spinbox(self.simWindow,state = "readonly",from_ = 2000,to = currentYear)
 		self.simStartYearSpin.pack()
 		self.simEndYearSpin.pack()
 
 
-		self.execSimulationBtn = tk.Button(sub,text = 'Show results',command = self.SimulationExec)
+		self.execSimulationBtn = tk.Button(self.simWindow,text = 'Show results',command = self.SimulationExec)
 		self.execSimulationBtn.pack()
 
-		#teamCountries,hillSizeName,hillSizeHeight,competitionCountry,startYear = 2020,endYear = 2021,gender = "M"
 
 	def SimulationExec(self):
-		print(self.simCountryListbox.curselection())
-		print(self.simCompetitionCountry.get())
-		print(int(self.simHillSizeHeightSpin .get()))
-		print(int(self.simStartYearSpin.get()))
-		print(int(self.simEndYearSpin.get()))
+		countries = sorted(['GER','AUT','JPN','FIN','NOR','POL','SLO','CZE','RUS','SUI'])
+		selectedCountries = []
+		for inx in self.simCountryListbox.curselection():
+			selectedCountries.append(countries[inx])
+
+		hillSizeName = RadioInxToHillRating(self.simHillSizeName)
+
+		gender = RadioInxToGender(self.simGender.get())
+
+		hillSizeHeight = int(self.simHillSizeHeightSpin.get())
+
+		competitoionCountry = self.self.simCompetitionCountryCombobox.get()
+
+		startYear = int(self.simStartYearSpin.get())
+		endYear = int(self.simEndYearSpin.get())
+		if IsHillHeightValid(hillSizeName,hillSizeHeight):
+			if hillSizeName == "NH":
+				tk.messagebox.showwarning('Warning','Selected for large hill, hill height must be between 85 and 109!')
+			elif hillSizeName == "LH":
+				tk.messagebox.showwarning('Warning','Selected for large hill, hill height must be between 110 and 184!')
+			else:
+				tk.messagebox.showwarning('Warning','Selected for flying hill, hill height must be 185 or above!')
+		elif endYear < startYear:
+			tk.messagebox.showwarning('Warning','Selected start year must be below selected end year!')
+		elif len(selectedCountries) == 0:
+			tk.messagebox.showwarning('Warning','You must select at least one competitor country!')
+		else:
+			teamCompetition = SimulateTeamCompetition(self.athletes,self.fisCodeMap,selectedCountries,hillSizeName,hillSizeHeight,competitionCountry,startYear,endYear,gender)
+			self.ShowTeamCompetition(self.simWindow,teamCompetition)
+
 
 	def MostNthPlacesSolo(self):
-		sub = tk.Toplevel(self)
+		self.simWindow = tk.Toplevel(self)
 		sub.wm_title("Most solo n-th places")
 		sub.resizable(False,False)
 		sub.geometry("400x400")
@@ -239,10 +277,12 @@ class MainMenu(tk.Tk):
 		self.execNPlaceBtn.pack()
 
 	def MostNthPlacesSoloExec(self):
-		
+		startYear = int(self.mostNStartYearSpinbox.get())
+		endYear = int(self.mostNEndYearSpinbox.get())
 
-		if int(self.mostNEndYearSpinbox.get()) < int(self.mostNStartYearSpinbox.get()): #popravimo meje
-			tk.messagebox.showwarning(title='Warning', message='Selected start year must be below selected end year.')
+
+		if endYear < startYear:
+			tk.messagebox.showwarning('Warning','Selected start year must be below selected end year!')
 			
 
 
@@ -289,6 +329,12 @@ class MainMenu(tk.Tk):
 		startYear = int(self.mostNTeamStartYearSpinbox.get())
 		endYear = int(self.mostNTeamEndYearSpinbox.get())
 
+
+		if endYear < startYear:
+			tk.messagebox.showwarning('Warning''Selected start year must be below selected end year!')
+		
+			
+
 	def GraphHomeAway(self):
 		sub = tk.Toplevel(self)
 		sub.wm_title("Home and away")
@@ -311,7 +357,7 @@ class MainMenu(tk.Tk):
 	def GraphHomeAwayExec(self):
 		name = self.awayNamebox.get("1.0",tk.END).strip()
 		surname = self.awaySurnamebox.get("1.0",tk.END).strip()
-		fisCode = op.Athlete.GetAthleteFisByName(self.athletes,self.name,surname)
+		fisCode = op.Athlete.GetAthleteFisByName(self.athletes,name,surname)
 
 		if fisCode == None:
 			tk.messagebox.showwarning("Warning",f"Name {name} {surname} not found!")
@@ -710,7 +756,6 @@ class MainMenu(tk.Tk):
 	def CompareTotalScoresExec(self):
 		HillSizeVar = self.CompareTotalScoresHillSizeNameVar.get()
 		HillSizeName = ['NH','LH','FH'][HillSizeVar]
-		print(HillSizeName)
 
 		name1 = self.CompareTotalScoresNamebox1.get("1.0",tk.END).strip()
 		surname1 = self.CompareTotalScoresSurnamebox1.get("1.0",tk.END).strip()
@@ -768,7 +813,7 @@ class MainMenu(tk.Tk):
 			print(tabAverageTotalPoints2)
 
 
-			charts.LineChart(x,(tabAverageTotalPoints1,tabAverageTotalPoints2),f'Comparison between {name1} {surname1} and {name2} {surname2}.','Years','Total points',[surname1,surname2])
+			charts.LineChart(x,(tabAverageTotalPoints1,tabAverageTotalPoints2),f'Comparison between {athlete1.name} {athlete2.surname} and {athlete2.name} {athlete2.surname}','Year','Average total points',[athlete2.surname,athlete2.surname])
 
 
 
