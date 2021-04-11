@@ -177,7 +177,7 @@ class MainMenu(tk.Tk):
 		for country in countries:
 			self.simCountryListbox.insert(tk.END,country)
 
-		
+
 		self.simHillSizeName = tk.IntVar(self.simWindow,0)
 		self.simHillSizeNameNHRadio = tk.Radiobutton(self.simWindow,text = "Normal hill",variable = self.simHillSizeName,value = 0) # 85–109
 		self.simHillSizeNameLHRadio = tk.Radiobutton(self.simWindow,text = "Large hill",variable = self.simHillSizeName,value = 1) # 110–184
@@ -221,7 +221,7 @@ class MainMenu(tk.Tk):
 
 		hillSizeHeight = int(self.simHillSizeHeightSpin.get())
 
-		competitoionCountry = self.simCompetitionCountryCombobox.get()
+		competitoionCountry = self.self.simCompetitionCountryCombobox.get()
 
 		startYear = int(self.simStartYearSpin.get())
 		endYear = int(self.simEndYearSpin.get())
@@ -242,35 +242,35 @@ class MainMenu(tk.Tk):
 
 
 	def MostNthPlacesSolo(self):
-		sub = tk.Toplevel(self)
+		self.simWindow = tk.Toplevel(self)
 		sub.wm_title("Most solo n-th places")
 		sub.resizable(False,False)
 		sub.geometry("400x400")
     	#tk.Label(text = text)
 
-		self.mostNPlabel = tk.Label(sub,text = 'Rank:')
+		self.mostNPlabel = tk.Label(self.simWindow,text = 'Rank:')
 		self.mostNPlabel.pack()
-		self.mostNPlaceSpinbox = tk.Spinbox(sub, from_=1, to=50,state = 'readonly')
+		self.mostNPlaceSpinbox = tk.Spinbox(self.simWindow, from_=1, to=50,state = 'readonly')
 		self.mostNPlaceSpinbox.pack()
 		
-		self.mostNGender = tk.Label(sub,text = 'Gender:')
+		self.mostNGender = tk.Label(self.simWindow,text = 'Gender:')
 		self.mostNGender.pack()
 		self.mostNGenderVar = tk.IntVar()
-		self.mostNGenderMRadiobutton = tk.Radiobutton(sub, text="Male", variable=self.mostNGenderVar, value=0)
+		self.mostNGenderMRadiobutton = tk.Radiobutton(self.simWindow, text="Male", variable=self.mostNGenderVar, value=0)
 		self.mostNGenderMRadiobutton.pack()
 
-		self.mostNGenderWRadiobutton = tk.Radiobutton(sub, text="Female", variable=self.mostNGenderVar, value=1) 
+		self.mostNGenderWRadiobutton = tk.Radiobutton(self.simWindow, text="Female", variable=self.mostNGenderVar, value=1) 
 		self.mostNGenderWRadiobutton.pack()
 
-		self.mostNloweryear = tk.Label(sub,text = 'From:')
+		self.mostNloweryear = tk.Label(self.simWindow,text = 'From:')
 		self.mostNloweryear.pack()
 		currentYear = t.Date.Today().year
-		self.mostNStartYearSpinbox = tk.Spinbox(sub, from_=2000, to=currentYear,state = 'readonly')
+		self.mostNStartYearSpinbox = tk.Spinbox(self.simWindow, from_=2000, to=currentYear,state = 'readonly')
 		self.mostNStartYearSpinbox.pack()
 
 		self.mostNlupperyear = tk.Label(sub,text = 'To:')
 		self.mostNlupperyear.pack()
-		self.mostNEndYearSpinbox = tk.Spinbox(sub, from_= 2000, to=currentYear,state = 'readonly')
+		self.mostNEndYearSpinbox = tk.Spinbox(self.simWindow, from_= 2000, to=currentYear,state = 'readonly')
 		self.mostNEndYearSpinbox.pack()
 
 
@@ -457,11 +457,11 @@ class MainMenu(tk.Tk):
 		endYear = int(self.topTeamEndYearSpinbox.get())
 
 		if endYear < startYear: #popravimo meje
-			tk.messagebox.showwarning('Warning','Selected start year must be below selected end year!')
+			tk.messagebox.showwarning(title='Warning', message='Selected start year must be below selected end year!', **options)
 		else:
 			tabFisCodes = op.TeamAthletesPrediction(self.athletes,country,hillSizeName,startYear,endYear,gender)
 			if len(tabFisCodes) < 4:
-				tk.messagebox.showwarning('Warning','There is not enough competitors to foram a team!')
+				tk.messagebox.showwarning(title='Warning', message='There is not enough competitors to foram a team!', **options)
 			else:
 				tabAthletes = []
 				for i in range(len(tabFisCodes)):
@@ -632,11 +632,12 @@ class MainMenu(tk.Tk):
 		self.numMedalsSoloNamelabel = tk.Label(sub,text = 'Name')
 		self.numMedalsSoloNamelabel.pack()
 		self.numMedalsSoloNamebox = tk.Text(sub,height = 1,width = 25)
-		self.numMedalsSoloNamebox.pack()
 		self.numMedalsSoloSurnamelabel = tk.Label(sub,text = 'Surname')
 		self.numMedalsSoloSurnamelabel.pack()
 		self.numMedalsSoloSurnamebox = tk.Text(sub,height = 1,width = 25)
 		self.numMedalsSoloSurnamebox.pack()
+		self.numMedalsSoloNamebox.pack()
+	
 
 		self.numMedalsSoloButtonExec = tk.Button(sub,text = "Show results",command = self.GraphNumMedalsSoloExec)
 		self.numMedalsSoloButtonExec.pack()
@@ -814,7 +815,7 @@ class MainMenu(tk.Tk):
 			print(tabAverageTotalPoints2)
 
 
-			charts.LineChart(x,(tabAverageTotalPoints1,tabAverageTotalPoints2),f'Comparison between {athlete1.name} {athlete1.surname} and {athlete2.name} {athlete2.surname}','Year','Average total points',[athlete1.surname,athlete2.surname])
+			charts.LineChart(x,(tabAverageTotalPoints1,tabAverageTotalPoints2),f'Comparison between {athlete1.name} {athlete2.surname} and {athlete2.name} {athlete2.surname}','Year','Average total points',[athlete2.surname,athlete2.surname])
 
 
 
