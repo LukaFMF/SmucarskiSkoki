@@ -5,6 +5,26 @@ from tkinter import messagebox
 import tools as t, time, datetime,obdelava_podatkov as op,charts
 from math import sin,pi
 
+def RadioInxToGender(inx):
+	if inx == 0:
+		return "M"
+	elif inx == 1:
+		return "F"
+	return "A"
+
+def RadioInxToHillRating(inx):
+	if inx == 0:
+		return "NH"
+	elif inx == 1:
+		return "LH"
+	return "FH"
+
+def IsHillHeightValid(hillSizeName,hillSizeHeight):
+	if hillSizeName == "NH":
+		return 85 <= hillSizeHeight <= 109
+	elif hillSizeName == "LH":
+		return 110 <= hillSizeHeight <= 184
+	return hillSizeHeight >= 185 
 
 class MainMenu(tk.Tk):
 	def __init__(self, *args, **kwargs):
@@ -252,11 +272,12 @@ class MainMenu(tk.Tk):
 		self.execNTeamPlaceBtn.pack()
 
 	def MostNthPlacesTeamExec(self):
+		startYear = int(self.mostNTeamStartYearSpinbox.get())
+		endYear = int(self.mostNTeamEndYearSpinbox.get())
+
+
+		if endYear < startYear: 
 		
-		
-		
-		if int(self.mostNTeamEndYearSpinbox.get()) < int(self.mostNTeamStartYearSpinbox.get()): 
-			tk.messagebox.showwarning(title='Warning', message='Selected start year must be below selected end year.', **options)
 			
 
 	def GraphHomeAway(self):
@@ -286,98 +307,198 @@ class MainMenu(tk.Tk):
 			xAxis,yAxis = op.CompetitionsAtHomeVsForeign(athlete)
 			charts.LineChart(xAxis,yAxis,f"Relative rank of {athlete.name} {athlete.surname} over his career","Time","Relative rank",["Home","Away"])
 
+	def ShowTopTeam(self,master,topTeam,country,hillSizeName):
+		sub = tk.Toplevel(master)
+		sub.wm_title(f"Top team for {country} on {hillSizeName}")
+		sub.resizable(False,False)
+
+		header = ("Fis code","Name","Surname","Birth year")
+
+		rows = [header]
+
+		for athlete in topTeam:
+			resultRow = []
+
+			resultRow.append(str(athlete.fisCode))
+			resultRow.append(athlete.name) 
+			resultRow.append(athlete.surname)
+
+			birthYear = athlete.birthYear
+			resultRow.append(str(birthYear) if birthYear != None else None)
+
+			rows.append(tuple(resultRow))
+
+		for i in range(len(rows)):
+			for j in range(len(rows[0])):
+				self.soloResultEntry = tk.Entry(sub, width=20)
+				self.soloResultEntry.grid(row = i,column = j)
+				self.soloResultEntry.insert(tk.END,rows[i][j])
 
 	def TopTeamCountry(self):
-		sub = tk.Toplevel(self)
-		sub.wm_title("Top country team")
-		sub.resizable(False,False)
-		sub.geometry("400x400")
+		self.topTeamWindow = tk.Toplevel(self)
+		self.topTeamWindow.wm_title("Top country team")
+		self.topTeamWindow.resizable(False,False)
+		self.topTeamWindow.geometry("400x400")
 
 		#country,hill = 'LH',startYear = 2020,endYear = 2021,gender = 'M'
 
 		countries = sorted(['GER','AUT','JPN','FIN','NOR','POL','SLO','CZE','RUS','SUI'])
 
 		
-		self.topTeamCountryCombobox= ttk.Combobox(sub,values = countries,state = 'readonly')
+		self.topTeamCountryCombobox= ttk.Combobox(self.topTeamWindow,values = countries,state = 'readonly')
 		self.topTeamCountryCombobox.pack()
 		
 		self.topTeamHillSizeVar = tk.IntVar()
-		self.topTeamHillSizeNH = tk.Radiobutton(sub, text="Normal hill", variable=self.topTeamHillSizeVar, value=0)
+		self.topTeamHillSizeNH = tk.Radiobutton(self.topTeamWindow, text="Normal hill", variable=self.topTeamHillSizeVar, value=0)
 		self.topTeamHillSizeNH.pack() 
-		self.topTeamHillSizeLH = tk.Radiobutton(sub, text="Large hill", variable=self.topTeamHillSizeVar, value=1)
+		self.topTeamHillSizeLH = tk.Radiobutton(self.topTeamWindow, text="Large hill", variable=self.topTeamHillSizeVar, value=1)
 		self.topTeamHillSizeLH.pack()
-		self.topTeamHillSizeFH = tk.Radiobutton(sub, text="Flying hill", variable=self.topTeamHillSizeVar, value=2)
+		self.topTeamHillSizeFH = tk.Radiobutton(self.topTeamWindow, text="Flying hill", variable=self.topTeamHillSizeVar, value=2)
 		self.topTeamHillSizeFH.pack()
 
 		self.topTeamGenderVar = tk.IntVar()
-		self.topTeamGenderMRadiobutton = tk.Radiobutton(sub, text="Male", variable=self.topTeamGenderVar, value=0)
+		self.topTeamGenderMRadiobutton = tk.Radiobutton(self.topTeamWindow, text="Male", variable=self.topTeamGenderVar, value=0)
 		self.topTeamGenderMRadiobutton.pack()
 
-		self.topTeamGenderWRadiobutton = tk.Radiobutton(sub, text="Female", variable=self.topTeamGenderVar, value=1) 
+		self.topTeamGenderWRadiobutton = tk.Radiobutton(self.topTeamWindow, text="Female", variable=self.topTeamGenderVar, value=1) 
 		self.topTeamGenderWRadiobutton.pack()
 
-		self.topTeamGenderARadiobutton = tk.Radiobutton(sub, text="Mixed", variable=self.topTeamGenderVar, value=2) 
+		self.topTeamGenderARadiobutton = tk.Radiobutton(self.topTeamWindow, text="Mixed", variable=self.topTeamGenderVar, value=2) 
 		self.topTeamGenderARadiobutton.pack()
 
 		currentYear = t.Date.Today().year
-		self.topTeamStartYearSpinbox = tk.Spinbox(sub, from_=2000, to=currentYear,state = 'readonly')
+		self.topTeamStartYearSpinbox = tk.Spinbox(self.topTeamWindow, from_=2000, to=currentYear,state = 'readonly')
 		self.topTeamStartYearSpinbox.pack()
 
 		
-		self.topTeamEndYearSpinbox = tk.Spinbox(sub, from_= 2000, to=currentYear,state = 'readonly')
+		self.topTeamEndYearSpinbox = tk.Spinbox(self.topTeamWindow, from_= 2000, to=currentYear,state = 'readonly')
 		self.topTeamEndYearSpinbox.pack()
 
 
-		self.exectopTeamCountryBtn = tk.Button(sub,text = 'Show results',command = self.TopTeamCountryExec)
+		self.exectopTeamCountryBtn = tk.Button(self.topTeamWindow,text = 'Show results',command = self.TopTeamCountryExec)
 		self.exectopTeamCountryBtn.pack()
 
 	def TopTeamCountryExec(self):
+		country = self.topTeamCountryCombobox.get()
+		gender =  RadioInxToGender(self.topTeamGenderVar.get())
+
+		hillSizeName = RadioInxToHillRating(self.topTeamHillSizeVar.get())
+
+		startYear = int(self.topTeamStartYearSpinbox.get())
+		endYear = int(self.topTeamEndYearSpinbox.get())
+
+		if endYear < startYear: #popravimo meje
+			tk.messagebox.showwarning(title='Warning', message='Selected start year must be below selected end year!', **options)
+		else:
+			tabFisCodes = op.TeamAthletesPrediction(self.athletes,country,hillSizeName,startYear,endYear,gender)
+			if len(tabFisCodes) < 4:
+				tk.messagebox.showwarning(title='Warning', message='There is not enough competitors to foram a team!', **options)
+			else:
+				tabAthletes = []
+				for i in range(len(tabFisCodes)):
+					tabAthletes.append(self.athletes[self.fisCodeMap[tabFisCodes[i]]])
+
+				self.ShowTopTeam(self.topTeamWindow,tabAthletes,country,hillSizeName)
+
+	def ShowSoloResults(self,master,athlete,soloResults):
+		sub = tk.Toplevel(master)
+		sub.wm_title(f"Solo results for {athlete.name} {athlete.surname}")
+		sub.resizable(False,False)
+		#sub.geometry("400x400")
 
 
+		header = ("Rank","Distance 1","Points 1","Distance 2","Points 2","Total points","Hill rating","Hill size","Location","Date")
 
-		if int(self.topTeamEndYearSpinbox.get()) < int(self.topTeamStartYearSpinbox.get()): #popravimo meje
-			tk.messagebox.showwarning(title='Warning', message='Selected start year must be below selected end year.', **options)
+		rows = [header]
+
+		for result in soloResults:
+			i,j,k = result
+			resultRow = []
+
+			resultRow.append(str(k + 1)) # Rank
+
+			event = self.events[i]
+			competition = self.events[i].competitions[j]
+			personalResult = self.events[i].competitions[j].results[k]
+
+			distance1 = personalResult.distance1
+			resultRow.append(f"{distance1:.1f}" if distance1 != None else "")
+
+			points1 = personalResult.points1
+			resultRow.append(f"{points1:.1f}" if points1 != None else "")
+
+			distance2 = personalResult.distance2
+			resultRow.append(f"{distance2:.1f}" if distance2 != None else "")
+
+			points2 = personalResult.points2
+			resultRow.append(f"{points2:.1f}" if points2 != None else "")
+
+			totalPoints = f"{personalResult.totalPoints:.1f}"
+			resultRow.append(totalPoints)
+
+			hillSizeName = competition.hillSizeName
+			resultRow.append(hillSizeName)
+
+			hillSizeHeight = str(competition.hillSizeHeight)
+			resultRow.append(str(hillSizeHeight) if hillSizeHeight != None else "")
+
+			location = event.country
+			resultRow.append(location)
+
+			date = competition.date
+			resultRow.append(str(date))
+
+			rows.append(tuple(resultRow))
+
+		for i in range(len(rows)):
+			for j in range(len(rows[0])):
+				self.soloResultEntry = tk.Entry(sub, width=20)
+				self.soloResultEntry.grid(row = i,column = j)
+				self.soloResultEntry.insert(tk.END,rows[i][j])
 
 	def DisplaySoloResults(self):
-		sub = tk.Toplevel(self)
-		sub.wm_title("Solo results")
-		sub.resizable(False,False)
-		sub.geometry("400x400")
+		self.displaySoloResultsWindow = tk.Toplevel(self)
+		self.displaySoloResultsWindow.wm_title("Solo results")
+		self.displaySoloResultsWindow.resizable(False,False)
+		self.displaySoloResultsWindow.geometry("400x400")
 
-		self.soloResultsNamebox = tk.Text(sub,height = 1,width = 25)
-		self.soloResultsSurnamebox = tk.Text(sub,height = 1,width = 25)
+		self.soloResultsNamebox = tk.Text(self.displaySoloResultsWindow,height = 1,width = 25)
+		self.soloResultsSurnamebox = tk.Text(self.displaySoloResultsWindow,height = 1,width = 25)
 		self.soloResultsNamebox.pack()
 		self.soloResultsSurnamebox.pack()
 
 		currentYear = t.Date.Today().year
-		self.soloResultsStartYearSpin = tk.Spinbox(sub, from_= 2000, to= currentYear,state = 'readonly')
-		self.soloResultsEndYearSpin = tk.Spinbox(sub, from_= 2000, to= currentYear,state = 'readonly')
+		self.soloResultsStartYearSpin = tk.Spinbox(self.displaySoloResultsWindow, from_= 2000, to= currentYear,state = 'readonly')
+		self.soloResultsEndYearSpin = tk.Spinbox(self.displaySoloResultsWindow, from_= 2000, to= currentYear,state = 'readonly')
 		self.soloResultsStartYearSpin.pack()
 		self.soloResultsEndYearSpin.pack()
 
-		self.soloResultsButtonExec = tk.Button(sub,text = "Show results",command = self.DisplaySoloResultsExec)
+		self.soloResultsButtonExec = tk.Button(self.displaySoloResultsWindow,text = "Show results",command = self.DisplaySoloResultsExec)
+		self.soloResultsButtonExec.pack()
 
 	def DisplaySoloResultsExec(self):
 		name = self.soloResultsNamebox.get("1.0",tk.END).strip()
 		surname = self.soloResultsSurnamebox.get("1.0",tk.END).strip()
 		fisCode = op.Athlete.GetAthleteFisByName(self.athletes,name,surname)
 
-		startYear = int(self.soloResultsStartYearSpin)
-		endYear = int(self.soloResultsEndYearSpin)
+		startYear = int(self.soloResultsStartYearSpin.get())
+		endYear = int(self.soloResultsEndYearSpin.get())
 
 		if fisCode == None:
 			tk.messagebox.showwarning("Warning",f"Name {name} {surname} not found!")
 		elif endYear < startYear:
 			tk.messagebox.showwarning("Warning","Selected start year must be below selected end year.")
 		else:
-			athlete = athletes[fisCodeMap[fisCode]]
+			athlete = self.athletes[self.fisCodeMap[fisCode]]
 
 			soloResults = []
 			for perseonalResult in athlete.personalResults:
 				if len(perseonalResult) == 3:
-					soloResults.append(perseonalResult)
+					i,j,k = perseonalResult
+					if startYear <= athlete.events[i].competitions[j].date.year <= endYear:
+						soloResults.append(perseonalResult)
 
-			# todo
+			self.ShowSoloResults(self.displaySoloResultsWindow,athlete,soloResults)
 
 
 	def DisplayTeamResults(self):
@@ -599,16 +720,6 @@ class MainMenu(tk.Tk):
 
 
 			charts.LineChart(x,(tabAverageTotalPoints1,tabAverageTotalPoints2),f'Comparison between {name1} {surname1} and {name2} {surname2}.','Years','Total points',[surname1,surname2])
-
-
-
-
-
-
-	def newWind(self):
-		t = tk.Toplevel(self)
-		t.wm_title("Window 1")
-		t.geometry("600x500")
 
 
 
