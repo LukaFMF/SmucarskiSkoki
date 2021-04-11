@@ -221,7 +221,7 @@ class MainMenu(tk.Tk):
 
 		hillSizeHeight = int(self.simHillSizeHeightSpin.get())
 
-		competitoionCountry = self.self.simCompetitionCountryCombobox.get()
+		competitoionCountry = self.simCompetitionCountryCombobox.get()
 
 		startYear = int(self.simStartYearSpin.get())
 		endYear = int(self.simEndYearSpin.get())
@@ -242,7 +242,7 @@ class MainMenu(tk.Tk):
 
 
 	def MostNthPlacesSolo(self):
-		self.simWindow = tk.Toplevel(self)
+		sub = tk.Toplevel(self)
 		sub.wm_title("Most solo n-th places")
 		sub.resizable(False,False)
 		sub.geometry("400x400")
@@ -409,7 +409,7 @@ class MainMenu(tk.Tk):
 		self.topTeamCountryCombobox= ttk.Combobox(self.topTeamWindow,values = countries,state = 'readonly')
 		self.topTeamCountryCombobox.pack()
 		
-		self.topTeamHillSizelabel = tk.Label(self.topTeamWindow,values,text = 'Hill sizes:')
+		self.topTeamHillSizelabel = tk.Label(self.topTeamWindow,text = 'Hill sizes:')
 		self.topTeamHillSizelabel.pack()
 
 		self.topTeamHillSizeVar = tk.IntVar()
@@ -420,7 +420,7 @@ class MainMenu(tk.Tk):
 		self.topTeamHillSizeFH = tk.Radiobutton(self.topTeamWindow, text="Flying hill", variable=self.topTeamHillSizeVar, value=2)
 		self.topTeamHillSizeFH.pack()
 
-		self.topGenderlabel = tk.Label(self.topTeamWindow,values,text = 'Gender:')
+		self.topGenderlabel = tk.Label(self.topTeamWindow,text = 'Gender:')
 		self.topGenderlabel.pack()
 		self.topTeamGenderVar = tk.IntVar()
 		self.topTeamGenderMRadiobutton = tk.Radiobutton(self.topTeamWindow, text="Male", variable=self.topTeamGenderVar, value=0)
@@ -457,11 +457,11 @@ class MainMenu(tk.Tk):
 		endYear = int(self.topTeamEndYearSpinbox.get())
 
 		if endYear < startYear: #popravimo meje
-			tk.messagebox.showwarning(title='Warning', message='Selected start year must be below selected end year!', **options)
+			tk.messagebox.showwarning('Warning','Selected start year must be below selected end year!')
 		else:
 			tabFisCodes = op.TeamAthletesPrediction(self.athletes,country,hillSizeName,startYear,endYear,gender)
 			if len(tabFisCodes) < 4:
-				tk.messagebox.showwarning(title='Warning', message='There is not enough competitors to foram a team!', **options)
+				tk.messagebox.showwarning('Warning','There is not enough competitors to foram a team!')
 			else:
 				tabAthletes = []
 				for i in range(len(tabFisCodes)):
@@ -632,10 +632,10 @@ class MainMenu(tk.Tk):
 		self.numMedalsSoloNamelabel = tk.Label(sub,text = 'Name')
 		self.numMedalsSoloNamelabel.pack()
 		self.numMedalsSoloNamebox = tk.Text(sub,height = 1,width = 25)
+		self.numMedalsSoloNamebox.pack()
 		self.numMedalsSoloSurnamelabel = tk.Label(sub,text = 'Surname')
 		self.numMedalsSoloSurnamelabel.pack()
 		self.numMedalsSoloSurnamebox = tk.Text(sub,height = 1,width = 25)
-		self.numMedalsSoloNamebox.pack()
 		self.numMedalsSoloSurnamebox.pack()
 
 		self.numMedalsSoloButtonExec = tk.Button(sub,text = "Show results",command = self.GraphNumMedalsSoloExec)
@@ -814,7 +814,7 @@ class MainMenu(tk.Tk):
 			print(tabAverageTotalPoints2)
 
 
-			charts.LineChart(x,(tabAverageTotalPoints1,tabAverageTotalPoints2),f'Comparison between {athlete1.name} {athlete2.surname} and {athlete2.name} {athlete2.surname}','Year','Average total points',[athlete2.surname,athlete2.surname])
+			charts.LineChart(x,(tabAverageTotalPoints1,tabAverageTotalPoints2),f'Comparison between {athlete1.name} {athlete1.surname} and {athlete2.name} {athlete2.surname}','Year','Average total points',[athlete1.surname,athlete2.surname])
 
 
 
