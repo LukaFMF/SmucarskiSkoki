@@ -1,39 +1,58 @@
-import tools as t, time, datetime, obdelava_podatkov as op,charts,ml
+#import tools as t, time, datetime,obdelava_podatkov as op,charts,ml
+import interface as i
 
-eventIds = t.GetEventIds(2000,int(datetime.date.today().year))
-# za popravit
-eventIds.remove(13322) # cudne oblike
-eventIds.remove(23918) # cudne oblike
-eventIds.remove(24255) # cudne oblike
-eventIds.remove(45432) # cudne oblike
-eventIds.sort()
-numEvents = len(eventIds)
+win = i.MainMenu()
+win.mainloop()
 
-start = time.time()
-events = []
-for i in range(numEvents):
-    print(f"\rDownloading eventId {eventIds[i]} ({i+1}/{numEvents})",end = "")
-    events.append(t.ReadEvent(eventIds[i]))
+print(win.countryListbox.get(i.tk.ACTIVE))
+# athletes = win.ahtletes
 
-print(f"\n{(time.time() - start):.3f}s to load")
+# countries = {}
+# for athlete in athletes:
+# 	for result in athlete.personalResults:
+# 		if len(result) == 4:
+# 			i,j,k,l = result
+# 			country = athlete.events[i].competitions[j].results[k].country
+# 			if country in countries:
+# 				countries[country] += 1
+# 			else:
+# 				countries[country] = 1
 
-athletes,fisCodeMap = op.athleteResults(events)
+# print(countries)
+# eventIds = t.GetEventIds(2000,int(datetime.date.today().year))
+# eventIds.remove(13322) # cudne oblike
+# eventIds.remove(23918) # cudne oblike
+# eventIds.remove(24255) # cudne oblike
+# eventIds.remove(45432) # cudne oblike
+# eventIds.sort()
+# numEvents = len(eventIds)
 
-rk = athletes[fisCodeMap[2918]]
+# start = time.time()
+# events = []
+# for i in range(numEvents):
+#     print(f"\rDownloading eventId {eventIds[i]} ({i+1}/{numEvents})",end = "")
+#     events.append(t.ReadEvent(eventIds[i]))
 
-pp = athletes[fisCodeMap[5658]]
 
-# ryo = athletes[fisCodeMap[6288]]
+# print(f"\n{(time.time() - start):.3f}s to load")
 
-# eisen = athletes[fisCodeMap[5253]]
+# athletes,fisCodeMap = op.athleteResults(events)
 
-# points1 = ml.PredictNextJump(eisen,240,"SLO",t.Date(2021,4,10),1)
-# print(points1)
-# points2 = ml.PredictNextJump(eisen,240,"SLO",t.Date(2021,4,10),2,points1)
-# print(points2)
+# rk = athletes[fisCodeMap[2918]]
 
-xAxis,yAxis = op.CompetitionsAtHomeVsForeign(rk)
-charts.LineChart(xAxis,yAxis,"Relative rank of Robert Kranjec over his career","Time","Relative rank",["Home","Away"])
+# pp = athletes[fisCodeMap[5658]]
+
+# # ryo = athletes[fisCodeMap[6288]]
+
+# # eisen = athletes[fisCodeMap[5253]]
+
+# # points1 = ml.PredictNextJump(eisen,240,"SLO",t.Date(2021,4,10),1)
+# # print(points1)
+# # points2 = ml.PredictNextJump(eisen,240,"SLO",t.Date(2021,4,10),2,points1)
+# # print(points2)
+
+# xAxis,yAxis = op.CompetitionsAtHomeVsForeign(rk)
+# charts.LineChart(xAxis,yAxis,"Relative rank of Robert Kranjec over his career","Time","Relative rank",["Home","Away"])
 
 # teamComp = op.SimulateTeamCompetition(athletes,fisCodeMap,["SLO","GER","NOR","AUT","JPN","POL","RUS","SUI","FIN"],"LH",140,"SLO",2020,2050)
 

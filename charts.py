@@ -123,7 +123,3 @@ def LineChart(xAxis,yAxis,title = None,xLabel = None,yLabel = None,tabLabels = N
 	
 	plt.legend(loc = "best")
 	plt.show()
-	
-	
-
-	

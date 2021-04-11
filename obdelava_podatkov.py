@@ -238,12 +238,6 @@ def MostNRanksTeam(athletes,n,startYear,endYear = None,gender = None):
 			tabMostNs.append(country)
 	return tabMostNs,mostNs
 
-
-
-
-
-
-
 def athleteResults(events):
 	athletes = []
 	fisCodesToIndex = {}

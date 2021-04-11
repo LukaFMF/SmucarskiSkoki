@@ -90,7 +90,7 @@ class Date:
 
 	@staticmethod
 	def Today():
-		year,month,day = date.today().timetuple()
+		year,month,day = date.today().timetuple()[:3]
 		return Date(year,month,day)
 		 
 
