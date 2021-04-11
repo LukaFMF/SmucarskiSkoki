@@ -329,15 +329,12 @@ class MainMenu(tk.Tk):
 		startYear = int(self.mostNTeamStartYearSpinbox.get())
 		endYear = int(self.mostNTeamEndYearSpinbox.get())
 
-<<<<<<< HEAD
 
 		if endYear < startYear:
 			tk.messagebox.showwarning('Warning''Selected start year must be below selected end year!')
 		
 			
 
-=======
->>>>>>> 1b55fbdf7a18da809846300cd6283e064fdcb541
 	def GraphHomeAway(self):
 		sub = tk.Toplevel(self)
 		sub.wm_title("Home and away")
