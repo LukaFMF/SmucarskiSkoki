@@ -631,10 +631,10 @@ class MainMenu(tk.Tk):
 		self.numMedalsSoloNamelabel = tk.Label(sub,text = 'Name')
 		self.numMedalsSoloNamelabel.pack()
 		self.numMedalsSoloNamebox = tk.Text(sub,height = 1,width = 25)
+		self.numMedalsSoloNamebox.pack()
 		self.numMedalsSoloSurnamelabel = tk.Label(sub,text = 'Surname')
 		self.numMedalsSoloSurnamelabel.pack()
 		self.numMedalsSoloSurnamebox = tk.Text(sub,height = 1,width = 25)
-		self.numMedalsSoloNamebox.pack()
 		self.numMedalsSoloSurnamebox.pack()
 
 		self.numMedalsSoloButtonExec = tk.Button(sub,text = "Show results",command = self.GraphNumMedalsSoloExec)
