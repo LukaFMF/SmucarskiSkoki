@@ -23,6 +23,7 @@ def BarChart(xAxis,yAxis,title = None,xLabel = None,yLabel = None,tabLabels = No
 			raise ChartException("Label on y axis must be a string!")
 		plt.ylabel(yLabel)
 	plt.xticks(xAxis,map(str,xAxis))
+	plt.tick_params(axis = 'x', which = 'both',bottom = False,top = False)
 
 	tabOffsets = [[] for _ in range(len(xAxis))]
 	for i,xValue in enumerate(xAxis):
@@ -71,6 +72,7 @@ def BarChart(xAxis,yAxis,title = None,xLabel = None,yLabel = None,tabLabels = No
 	
 	plt.legend(loc = "best")
 	plt.show()
+	plt.close()
 
 def LineChart(xAxis,yAxis,title = None,xLabel = None,yLabel = None,tabLabels = None,tabColors = None):
 	'''xAxis bo tabela, yAxis pa touple podatkov, ki jih želimo narisati.'''

@@ -349,16 +349,88 @@ class MainMenu(tk.Tk):
 		pass
 
 	def DisplayTeamResults(self):
-		pass
+		sub = tk.Toplevel(self)
+		sub.wm_title("Team results")
+		sub.resizable(False,False)
+		sub.geometry("400x400")
+
+		countries = sorted(['GER','AUT','JPN','FIN','NOR','POL','SLO','CZE','RUS','SUI'])
+
+		
+		self.displayTeamResultsCountriesCombobox= ttk.Combobox(sub,values = countries,state = 'readonly')
+		self.displayTeamResultsCountriesCombobox.pack()
+
+
+		self.displayTeamResultsStartYearSpinbox = tk.Spinbox(sub, from_=2000, to=2021,state = 'readonly')
+		self.displayTeamResultsStartYearSpinbox.pack()
+
+		self.displayTeamResultsEndtYearSpinbox = tk.Spinbox(sub, from_= 2000, to=2021,state = 'readonly')
+		self.displayTeamResultsEndtYearSpinbox.pack()
+
+
+		self.execdisplayTeamResultBtn = tk.Button(sub,text = 'Show results',command = self.DisplayTeamResultsExec)
+		self.execdisplayTeamResultBtn.pack()
 
 	def DisplayTeamResultsExec(self):
-		pass
+		if int(self.displayTeamResultsEndtYearSpinbox.get()) < int(self.displayTeamResultsEndtYearSpinbox.get()):
+			tk.messagebox.showwarning(title='Warning', message='Selected start year must be below selected end year.')
+		else:
+			tabTeamResults = []
+			start = int(self.displayTeamResultsStartYearSpinbox.get())
+			end = int(self.displayTeamResultsEndtYearSpinbox.get())
+			country = self.displayTeamResultsCountriesCombobox.get()
+			for athlete in self.athletes:
+				if athlete.country == country:
+					for result in athlete.personalResults:
+						if len(result) == 4:	
+							i,j,k,l = result
+							if start <= athlete.events[i].competitions[j].date.year <= end:
+								tabTeamResults.append(result)
+							
+			
 
 	def GraphNumMedalsSolo(self):
 		pass
 
 	def GraphNumMedalsTeam(self):
-		pass
+		sub = tk.Toplevel(self)
+		sub.wm_title("Team medals")
+		sub.resizable(False,False)
+		sub.geometry("400x400")
+
+		countries = sorted(['GER','AUT','JPN','FIN','NOR','POL','SLO','CZE','RUS','SUI'])
+
+		self.graphNUmberTeamsCountryCombobox= ttk.Combobox(sub,values = countries,state = 'readonly')
+		self.graphNUmberTeamsCountryCombobox.pack()
+
+		self.execgraphNUmberTeamsCountryBtn = tk.Button(sub,text = 'Show results',command = self.GraphNumMedalsTeamExec)
+		self.execgraphNUmberTeamsCountryBtn.pack()
+
+	def GraphNumMedalsTeamExec(self):
+		allYears = set()
+		country = self.graphNUmberTeamsCountryCombobox.get()
+		tabTeamResults = []
+		for athlete in self.athletes:
+			if athlete.country == country:
+				for result in athlete.personalResults:
+					if len(result) == 4:	
+						i,j,k,l = result
+						tabTeamResults.append(result)
+						allYears.add(athlete.events[i].competitions[j].date.year)
+		lower = min(allYears)
+		upper = max(allYears)
+		x = list(range(lower,upper + 1))
+		y = [[0,0,0] for _ in range(len(x))]
+		for index in range(len(x)):
+			year = x[index] 
+			for res in tabTeamResults:
+				i,j,k,l = res
+				if self.events[i].competitions[j].date.year == year:
+					rank = k + 1
+					if 1 <= rank <= 3:
+						y[index][rank - 1] += 1
+		charts.BarChart(x,tuple(list(y)),f'Chart presenting the number of medals of {country}','Years','Medals',['Gold','SIlver','Bronze'],['gold','silver','#cd7f32'])
+					
 
 	def CompareTotalScores(self):
 		pass

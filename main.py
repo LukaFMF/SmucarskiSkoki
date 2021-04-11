@@ -161,7 +161,7 @@ print(win.countryListbox.get(i.tk.ACTIVE))
 # for result in rk.personalResults:
 #   if len(result) == 3 and rk.events[result[0]].competitions[result[1]].date.year == 2005 and result[2] == 0:
 #       print(rk.events[result[0]].competitions[result[1]].raceId)
-            
+
 # izbran = athletes[fisCodeMap[6392]]
 # tabTotalPoints = []
 # for res in izbran.personalResults:

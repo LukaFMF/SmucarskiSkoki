@@ -238,6 +238,7 @@ def MostNRanksTeam(athletes,n,startYear,endYear = None,gender = None):
 			tabMostNs.append(country)
 	return tabMostNs,mostNs
 
+
 def athleteResults(events):
 	athletes = []
 	fisCodesToIndex = {}
@@ -293,7 +294,6 @@ class Athlete:
 				ret += f"\tRank: {t.ToOrdinalStr(teamPlaceInx + 1)} place\n"
 				ret += f"{self.events[eventInx].competitions[compInx].results[teamPlaceInx].results[teamTabInx]}\n"
 		return ret
-	
 	@staticmethod
 	def GetAthleteFisByName(athletes,name,surname):
 		name = name.strip().lower()
@@ -304,4 +304,3 @@ class Athlete:
 				return athlete.fisCode
 
 		return None
-
