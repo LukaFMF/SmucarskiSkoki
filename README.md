@@ -16,4 +16,17 @@ spletne strani https://www.fis-ski.com/DB/ski-jumping/calendar-results.html.
 3. teden: parametrizacija in grafični prikaz podatkov,
 4. teden: popravki in izboljšave.
 
-Can extract files from data.7z
+## Knjižnice:
+- sklearn
+- numpy
+- datetime
+- matplotlib
+- tkinter
+- re
+- requests
+- datetime
+- struct
+
+## Opomba
+Če prenašanje datotek traja predolgo, potem lahko v mapo data prekopirate datoteke iz
+arhiva data.zip.

@@ -228,7 +228,9 @@ def MostNRanksTeam(athletes,n,startYear,endYear = None,gender = None):
 							fisCodeAndNumNOfATeam[athlete.country] += 1
 						else:
 							fisCodeAndNumNOfATeam[athlete.country] = 1
-	
+	if len(fisCodeAndNumNOfATeam) == 0:
+		return [],0
+		
 	mostNs = max(fisCodeAndNumNOfATeam.values())
 	
 	tabMostNs = []

@@ -3,7 +3,6 @@ from tkinter import messagebox
 import tkinter.ttk as ttk
 from tkinter import messagebox
 import tools as t, time, datetime,obdelava_podatkov as op,charts
-from math import sin,pi
 
 def RadioInxToGender(inx):
 	if inx == 0:
@@ -27,6 +26,7 @@ def IsHillHeightValid(hillSizeName,hillSizeHeight):
 	return hillSizeHeight >= 185 
 
 class MainMenu(tk.Tk):
+	elementPadding = (5,0)
 	def __init__(self, *args, **kwargs):
 		tk.Tk.__init__(self, *args, **kwargs)
 		self.title("Ski jumping analysis")
@@ -90,12 +90,13 @@ class MainMenu(tk.Tk):
 
 	def InitMenu(self):
 		self.geometry("400x800")
+		self.resizable(False,False)
 
 		paddingY = (25,5) # top, bottom
 		textsAndCommands = [
 			("Simulate team competition:",self.Simulation),
-			("Display athlete with most n-th places:",self.MostNthPlacesSolo),
-			("Display country with most n-th places:",self.MostNthPlacesTeam),
+			("Display athletes with most n-th places:",self.MostNthPlacesSolo),
+			("Display countries with most n-th places:",self.MostNthPlacesTeam),
 			("Graph rank of a competition at home and away:",self.GraphHomeAway),
 			("Display country\'s best team based on solo results:",self.TopTeamCountry),
 			("Display all solo results of an athlete:",self.DisplaySoloResults),
@@ -120,7 +121,7 @@ class MainMenu(tk.Tk):
 		sub.resizable(False,False)
 		#sub.geometry("400x400")
 
-		header = ("Rank","Country","Fis code","Name","Surname","Points 1","Points 2","Total points")
+		header = ("Place","Country","Fis code","Name","Surname","Points 1","Points 2","Total points")
 
 		rows = [header]
 
@@ -132,7 +133,7 @@ class MainMenu(tk.Tk):
 			country = teamRes.country
 			resultRow.append(country)
 
-			resultRow.extend(["","","","",""]) # fiscode, name, surname,  points1,  points2
+			resultRow.extend(["","","","",""]) 
 			totalPoints = teamRes.totalPoints
 			resultRow.append(f"{totalPoints:.1f}")
 
@@ -161,25 +162,28 @@ class MainMenu(tk.Tk):
 
 		for i in range(len(rows)):
 			for j in range(len(rows[0])):
-				self.soloResultEntry = tk.Entry(sub, width=20)
-				self.soloResultEntry.grid(row = i,column = j)
-				self.soloResultEntry.insert(tk.END,rows[i][j])
+				self.teamCompetitionEntry = tk.Entry(sub, width=20)
+				self.teamCompetitionEntry.grid(row = i,column = j)
+				self.teamCompetitionEntry.insert(tk.END,rows[i][j])
 
 	
 	def Simulation(self):
 		self.simWindow = tk.Toplevel(self)
 		self.simWindow.wm_title("Simulation")
 		self.simWindow.resizable(False,False)
-		self.simWindow.geometry("400x400")
+		self.simWindow.geometry("400x595")
 
 		countries = sorted(['GER','AUT','JPN','FIN','NOR','POL','SLO','CZE','RUS','SUI'])
 
-		self.simCountryListbox = tk.Listbox(self.simWindow,selectmode = "multiple")
+		self.simCompetitorsLabel = tk.Label(self.simWindow,text = "Teams:")
+		self.simCompetitorsLabel.pack(pady = self.elementPadding)
+		self.simCountryListbox = tk.Listbox(self.simWindow,selectmode = "multiple",exportselection = False)
 		self.simCountryListbox.pack()
 		for country in countries:
 			self.simCountryListbox.insert(tk.END,country)
 
-
+		self.simHillCategoryLabel = tk.Label(self.simWindow,text = "Hill ranking:")
+		self.simHillCategoryLabel.pack(pady = self.elementPadding)
 		self.simHillSizeName = tk.IntVar(self.simWindow,0)
 		self.simHillSizeNameNHRadio = tk.Radiobutton(self.simWindow,text = "Normal hill",variable = self.simHillSizeName,value = 0) # 85–109
 		self.simHillSizeNameLHRadio = tk.Radiobutton(self.simWindow,text = "Large hill",variable = self.simHillSizeName,value = 1) # 110–184
@@ -188,27 +192,37 @@ class MainMenu(tk.Tk):
 		self.simHillSizeNameLHRadio.pack()
 		self.simHillSizeNameFHRadio.pack()
 
+		self.simHillHeightLabel = tk.Label(self.simWindow,text = "Hill height:")
+		self.simHillHeightLabel.pack(pady = self.elementPadding)
 		self.simHillSizeHeightSpin = tk.Spinbox(self.simWindow,state = "readonly",increment = 5,from_ = 85,to = 240)
 		self.simHillSizeHeightSpin.pack()
 
+		self.simLocationLabel = tk.Label(self.simWindow,text = "Location:")
+		self.simLocationLabel.pack(pady = self.elementPadding)
 		self.simCompetitionCountryCombobox = ttk.Combobox(self.simWindow,state="readonly",values = countries)
 		self.simCompetitionCountryCombobox.pack()
 
+		self.simGenderLabel = tk.Label(self.simWindow,text = "Gender:")
+		self.simGenderLabel.pack(pady = self.elementPadding)
 		self.simGender = tk.IntVar(self.simWindow,0)
-		self.simGenderMRadio = tk.Radiobutton(self.simWindow,text = "M",variable = self.simGender,value = 0)
-		self.simGenderWRadio = tk.Radiobutton(self.simWindow,text = "W",variable = self.simGender,value = 1)
+		self.simGenderMRadio = tk.Radiobutton(self.simWindow,text = "Men",variable = self.simGender,value = 0)
+		self.simGenderWRadio = tk.Radiobutton(self.simWindow,text = "Women",variable = self.simGender,value = 1)
 		self.simGenderMRadio.pack()
 		self.simGenderWRadio.pack()
 
+		self.simStartYearLabel = tk.Label(self.simWindow,text = "From:")
+		self.simStartYearLabel.pack(pady = self.elementPadding)
 		currentYear = t.Date.Today().year
 		self.simStartYearSpin = tk.Spinbox(self.simWindow,state = "readonly",from_ = 2000,to = currentYear)
-		self.simEndYearSpin = tk.Spinbox(self.simWindow,state = "readonly",from_ = 2000,to = currentYear)
 		self.simStartYearSpin.pack()
+		self.simEndYearLabel = tk.Label(self.simWindow,text = "To:")
+		self.simEndYearLabel.pack(pady = self.elementPadding)
+		self.simEndYearSpin = tk.Spinbox(self.simWindow,state = "readonly",from_ = 2000,to = currentYear)
 		self.simEndYearSpin.pack()
 
 
-		self.execSimulationBtn = tk.Button(self.simWindow,text = 'Show results',command = self.SimulationExec)
-		self.execSimulationBtn.pack()
+		self.execSimulationBtn = tk.Button(self.simWindow,text = 'Simulate',command = self.SimulationExec)
+		self.execSimulationBtn.pack(pady = self.elementPadding)
 
 
 	def SimulationExec(self):
@@ -242,99 +256,175 @@ class MainMenu(tk.Tk):
 			teamCompetition = op.SimulateTeamCompetition(self.athletes,self.fisCodeMap,selectedCountries,hillSizeName,hillSizeHeight,competitionCountry,startYear,endYear,gender)
 			self.ShowTeamCompetition(self.simWindow,teamCompetition)
 
+	def ShowSoloMostN(self,master,athletes,mostNs,place):
+		ordinalRank = t.ToOrdinalStr(place)
+		sub = tk.Toplevel(master)
+		sub.wm_title(f"Athletes with most {ordinalRank} places")
+		sub.resizable(False,False)
+
+		header = (f"Number of {ordinalRank} places","Fis code","Name","Surname","Birth year","Country")
+
+		rows = [header]
+		for athlete in athletes:
+			resultRow = [str(mostNs)]
+
+			fisCode = athlete.fisCode
+			resultRow.append(str(fisCode))
+
+			name = athlete.name 
+			resultRow.append(name)
+
+			surname = athlete.surname
+			resultRow.append(surname)
+
+			birthYear = athlete.birthYear
+			resultRow.append(str(birthYear) if birthYear != None else "")
+
+			country = athlete.country
+			resultRow.append(country)
+
+			rows.append(resultRow)
+		
+		for i in range(len(rows)):
+			for j in range(len(rows[0])):
+				self.mostSoloNEntry = tk.Entry(sub, width=20)
+				self.mostSoloNEntry.grid(row = i,column = j)
+				self.mostSoloNEntry.insert(tk.END,rows[i][j])
 
 	def MostNthPlacesSolo(self):
-		self.simWindow = tk.Toplevel(self)
-		sub.wm_title("Most solo n-th places")
-		sub.resizable(False,False)
-		sub.geometry("400x400")
-    	#tk.Label(text = text)
+		self.mostSoloPlacesWindow = tk.Toplevel(self)
+		self.mostSoloPlacesWindow.wm_title("Most solo n-th places")
+		self.mostSoloPlacesWindow.resizable(False,False)
+		self.mostSoloPlacesWindow.geometry("400x255")
 
-		self.mostNPlabel = tk.Label(self.simWindow,text = 'Rank:')
-		self.mostNPlabel.pack()
-		self.mostNPlaceSpinbox = tk.Spinbox(self.simWindow, from_=1, to=50,state = 'readonly')
+		self.mostNPlabel = tk.Label(self.mostSoloPlacesWindow,text = 'Place:')
+		self.mostNPlabel.pack(pady = self.elementPadding)
+		self.mostNPlaceSpinbox = tk.Spinbox(self.mostSoloPlacesWindow, from_=1, to=50,state = 'readonly')
 		self.mostNPlaceSpinbox.pack()
 		
-		self.mostNGender = tk.Label(self.simWindow,text = 'Gender:')
-		self.mostNGender.pack()
+		self.mostNGender = tk.Label(self.mostSoloPlacesWindow,text = 'Gender:')
+		self.mostNGender.pack(pady = self.elementPadding)
 		self.mostNGenderVar = tk.IntVar()
-		self.mostNGenderMRadiobutton = tk.Radiobutton(self.simWindow, text="Male", variable=self.mostNGenderVar, value=0)
+		self.mostNGenderMRadiobutton = tk.Radiobutton(self.mostSoloPlacesWindow, text="Men", variable=self.mostNGenderVar, value=0)
 		self.mostNGenderMRadiobutton.pack()
 
-		self.mostNGenderWRadiobutton = tk.Radiobutton(self.simWindow, text="Female", variable=self.mostNGenderVar, value=1) 
+		self.mostNGenderWRadiobutton = tk.Radiobutton(self.mostSoloPlacesWindow, text="Women", variable=self.mostNGenderVar, value=1) 
 		self.mostNGenderWRadiobutton.pack()
 
-		self.mostNloweryear = tk.Label(self.simWindow,text = 'From:')
-		self.mostNloweryear.pack()
+		self.mostNloweryear = tk.Label(self.mostSoloPlacesWindow,text = 'From:')
+		self.mostNloweryear.pack(pady = self.elementPadding)
 		currentYear = t.Date.Today().year
-		self.mostNStartYearSpinbox = tk.Spinbox(self.simWindow, from_=2000, to=currentYear,state = 'readonly')
+		self.mostNStartYearSpinbox = tk.Spinbox(self.mostSoloPlacesWindow, from_=2000, to=currentYear,state = 'readonly')
 		self.mostNStartYearSpinbox.pack()
 
-		self.mostNlupperyear = tk.Label(sub,text = 'To:')
-		self.mostNlupperyear.pack()
-		self.mostNEndYearSpinbox = tk.Spinbox(self.simWindow, from_= 2000, to=currentYear,state = 'readonly')
+		self.mostNlupperyear = tk.Label(self.mostSoloPlacesWindow,text = 'To:')
+		self.mostNlupperyear.pack(pady = self.elementPadding)
+		self.mostNEndYearSpinbox = tk.Spinbox(self.mostSoloPlacesWindow, from_= 2000, to=currentYear,state = 'readonly')
 		self.mostNEndYearSpinbox.pack()
 
 
-		self.execNPlaceBtn = tk.Button(sub,text = 'Show results',command = self.MostNthPlacesSoloExec)
-		self.execNPlaceBtn.pack()
+		self.execNPlaceBtn = tk.Button(self.mostSoloPlacesWindow,text = 'Show',command = self.MostNthPlacesSoloExec)
+		self.execNPlaceBtn.pack(pady = self.elementPadding)
 
 	def MostNthPlacesSoloExec(self):
+		place = int(self.mostNPlaceSpinbox.get())
+
+		gender = RadioInxToGender(self.mostNGenderVar.get())
+
 		startYear = int(self.mostNStartYearSpinbox.get())
 		endYear = int(self.mostNEndYearSpinbox.get())
 
-
 		if endYear < startYear:
 			tk.messagebox.showwarning('Warning','Selected start year must be below selected end year!')
-			
+		else:
+			tabFisCodes,mostNs = op.MostNRanks(self.athletes,place,startYear,endYear,gender)
+			if len(tabFisCodes) == 0:
+				tk.messagebox.showwarning('Warning',f'There are no athletes with {t.ToOrdinalStr(place)} place in this time period!')
+			else:
+				competitors = []
+				for i in range(len(tabFisCodes)):
+					competitors.append(self.athletes[self.fisCodeMap[tabFisCodes[i]]])
 
+				self.ShowSoloMostN(self.mostSoloPlacesWindow,competitors,mostNs,place)
+			
+	def ShowTeamMostN(self,master,countries,mostNs,place):
+		ordinalRank = t.ToOrdinalStr(place)
+		sub = tk.Toplevel(master)
+		sub.wm_title(f"Countries with most {ordinalRank} places")
+		sub.resizable(False,False)
+
+		header = (f"Number of {ordinalRank} places","Country")
+
+		rows = [header]
+		for country in countries:
+			resultRow = [mostNs]
+
+			resultRow.append(country)
+
+			rows.append(resultRow)
+
+		for i in range(len(rows)):
+			for j in range(len(rows[0])):
+				self.mostSoloNEntry = tk.Entry(sub, width=20)
+				self.mostSoloNEntry.grid(row = i,column = j)
+				self.mostSoloNEntry.insert(tk.END,rows[i][j])
 
 	def MostNthPlacesTeam(self):
-		sub = tk.Toplevel(self)
-		sub.wm_title("Most team n-th places")
-		sub.resizable(False,False)
-		sub.geometry("400x400")
+		self.mostTeamPlacesWindow = tk.Toplevel(self)
+		self.mostTeamPlacesWindow.wm_title("Most team n-th places")
+		self.mostTeamPlacesWindow.resizable(False,False)
+		self.mostTeamPlacesWindow.geometry("400x275")
 
-		self.mostNTeamPlacelabel = tk.Label(sub,text = 'Rank:')
-		self.mostNTeamPlacelabel.pack()
-		self.mostNTeamPlaceSpinbox = tk.Spinbox(sub, from_=1, to=50,state = 'readonly')
+		self.mostNTeamPlacelabel = tk.Label(self.mostTeamPlacesWindow,text = 'Place:')
+		self.mostNTeamPlacelabel.pack(pady = self.elementPadding)
+		self.mostNTeamPlaceSpinbox = tk.Spinbox(self.mostTeamPlacesWindow, from_=1, to=6,state = 'readonly')
 		self.mostNTeamPlaceSpinbox.pack()
 
-		self.mostNTeamPlaceGenderlabel = tk.Label(sub,text = 'Gender:')
-		self.mostNTeamPlaceGenderlabel.pack()
+		self.mostNTeamPlaceGenderlabel = tk.Label(self.mostTeamPlacesWindow,text = 'Gender:')
+		self.mostNTeamPlaceGenderlabel.pack(pady = self.elementPadding)
 		self.mostNTeamGenderVar = tk.IntVar()
-		self.mostNTeamGenderMRadiobutton = tk.Radiobutton(sub, text="Male", variable=self.mostNTeamGenderVar, value=0)
+		self.mostNTeamGenderMRadiobutton = tk.Radiobutton(self.mostTeamPlacesWindow, text="Men", variable=self.mostNTeamGenderVar, value=0)
 		self.mostNTeamGenderMRadiobutton.pack()
 
-		self.mostNTeamGenderWRadiobutton = tk.Radiobutton(sub, text="Female", variable=self.mostNTeamGenderVar, value=1) 
+		self.mostNTeamGenderWRadiobutton = tk.Radiobutton(self.mostTeamPlacesWindow, text="Women", variable=self.mostNTeamGenderVar, value=1) 
 		self.mostNTeamGenderWRadiobutton.pack()
 
-		self.mostNTeamGenderARadiobutton = tk.Radiobutton(sub, text="Mixed", variable=self.mostNTeamGenderVar, value=2) 
+		self.mostNTeamGenderARadiobutton = tk.Radiobutton(self.mostTeamPlacesWindow, text="Mixed", variable=self.mostNTeamGenderVar, value=2) 
 		self.mostNTeamGenderARadiobutton.pack()
 
+		self.mostNYearLowerlabel = tk.Label(self.mostTeamPlacesWindow,text = 'From:')
+		self.mostNYearLowerlabel.pack(pady = self.elementPadding)
 		currentYear = t.Date.Today().year
-
-		self.mostNYearLowerlabel = tk.Label(sub,text = 'From:')
-		self.mostNYearLowerlabel.pack()
-		self.mostNTeamStartYearSpinbox = tk.Spinbox(sub, from_=2000, to= currentYear,state = 'readonly')
+		self.mostNTeamStartYearSpinbox = tk.Spinbox(self.mostTeamPlacesWindow, from_=2000, to= currentYear,state = 'readonly')
 		self.mostNTeamStartYearSpinbox.pack()
 
-		self.mostNYearUpperlabel = tk.Label(sub,text = 'To:')
-		self.mostNYearUpperlabel.pack()
-		self.mostNTeamEndYearSpinbox = tk.Spinbox(sub, from_= 2000, to= currentYear,state = 'readonly')
+		self.mostNYearUpperlabel = tk.Label(self.mostTeamPlacesWindow,text = 'To:')
+		self.mostNYearUpperlabel.pack(pady = self.elementPadding)
+		self.mostNTeamEndYearSpinbox = tk.Spinbox(self.mostTeamPlacesWindow, from_= 2000, to= currentYear,state = 'readonly')
 		self.mostNTeamEndYearSpinbox.pack()
 
 
-		self.execNTeamPlaceBtn = tk.Button(sub,text = 'Show results',command = self.MostNthPlacesTeamExec)
-		self.execNTeamPlaceBtn.pack()
+		self.execNTeamPlaceBtn = tk.Button(self.mostTeamPlacesWindow,text = 'Show',command = self.MostNthPlacesTeamExec)
+		self.execNTeamPlaceBtn.pack(pady = self.elementPadding)
 
 	def MostNthPlacesTeamExec(self):
+		place = int(self.mostNTeamPlaceSpinbox.get())
+
+		gender = RadioInxToGender(self.mostNTeamGenderVar.get())
+
 		startYear = int(self.mostNTeamStartYearSpinbox.get())
 		endYear = int(self.mostNTeamEndYearSpinbox.get())
 
 
 		if endYear < startYear:
-			tk.messagebox.showwarning('Warning''Selected start year must be below selected end year!')
+			tk.messagebox.showwarning('Warning','Selected start year must be below selected end year!')
+		else:
+			countries,mostNs = op.MostNRanksTeam(self.athletes,place,startYear,endYear,gender)
+			if len(countries) == 0:
+				tk.messagebox.showwarning('Warning',f'There are no countries with {t.ToOrdinalStr(place)} place in this time period!')
+			else:
+				countries
+				self.ShowTeamMostN(self.mostTeamPlacesWindow,countries,mostNs,place)
 		
 			
 
@@ -342,19 +432,19 @@ class MainMenu(tk.Tk):
 		sub = tk.Toplevel(self)
 		sub.wm_title("Home and away")
 		sub.resizable(False,False)
-		sub.geometry("400x400")
+		sub.geometry("400x130")
 
 		self.Namelabel = tk.Label(sub,text = 'Name:')
-		self.Namelabel.pack()
+		self.Namelabel.pack(pady = self.elementPadding)
 		self.awayNamebox = tk.Text(sub,height = 1,width = 25)
-		self.Surnamelabel = tk.Label(sub,text = 'Surname:')
-		self.Surnamelabel.pack()
-		self.awaySurnamebox = tk.Text(sub,height = 1,width = 25)
 		self.awayNamebox.pack()
+		self.Surnamelabel = tk.Label(sub,text = 'Surname:')
+		self.Surnamelabel.pack(pady = self.elementPadding)
+		self.awaySurnamebox = tk.Text(sub,height = 1,width = 25)
 		self.awaySurnamebox.pack()
 
-		self.awayButtonExec = tk.Button(sub,text = "Show results",command = self.GraphHomeAwayExec)
-		self.awayButtonExec.pack()
+		self.awayButtonExec = tk.Button(sub,text = "Graph",command = self.GraphHomeAwayExec)
+		self.awayButtonExec.pack(pady = self.elementPadding)
 
 
 	def GraphHomeAwayExec(self):
@@ -392,28 +482,27 @@ class MainMenu(tk.Tk):
 
 		for i in range(len(rows)):
 			for j in range(len(rows[0])):
-				self.soloResultEntry = tk.Entry(sub, width=20)
-				self.soloResultEntry.grid(row = i,column = j)
-				self.soloResultEntry.insert(tk.END,rows[i][j])
+				self.topTeamEntry = tk.Entry(sub, width=20)
+				self.topTeamEntry.grid(row = i,column = j)
+				self.topTeamEntry.insert(tk.END,rows[i][j])
 
 	def TopTeamCountry(self):
 		self.topTeamWindow = tk.Toplevel(self)
-		self.topTeamWindow.wm_title("Top country team")
+		self.topTeamWindow.wm_title("Top team in a country")
 		self.topTeamWindow.resizable(False,False)
-		self.topTeamWindow.geometry("400x400")
+		self.topTeamWindow.geometry("400x355")
 
 		#country,hill = 'LH',startYear = 2020,endYear = 2021,gender = 'M'
 
 		countries = sorted(['GER','AUT','JPN','FIN','NOR','POL','SLO','CZE','RUS','SUI'])
 
 		self.topTeamCountrylabel = tk.Label(self.topTeamWindow,text = 'Country:')
-		self.topTeamCountrylabel.pack()
+		self.topTeamCountrylabel.pack(pady = self.elementPadding)
 		self.topTeamCountryCombobox= ttk.Combobox(self.topTeamWindow,values = countries,state = 'readonly')
 		self.topTeamCountryCombobox.pack()
 		
-		self.topTeamHillSizelabel = tk.Label(self.topTeamWindow,text = 'Hill sizes:')
-		self.topTeamHillSizelabel.pack()
-
+		self.topTeamHillSizelabel = tk.Label(self.topTeamWindow,text = 'Hill size:')
+		self.topTeamHillSizelabel.pack(pady = self.elementPadding)
 		self.topTeamHillSizeVar = tk.IntVar()
 		self.topTeamHillSizeNH = tk.Radiobutton(self.topTeamWindow, text="Normal hill", variable=self.topTeamHillSizeVar, value=0)
 		self.topTeamHillSizeNH.pack() 
@@ -423,28 +512,28 @@ class MainMenu(tk.Tk):
 		self.topTeamHillSizeFH.pack()
 
 		self.topGenderlabel = tk.Label(self.topTeamWindow,text = 'Gender:')
-		self.topGenderlabel.pack()
+		self.topGenderlabel.pack(pady = self.elementPadding)
 		self.topTeamGenderVar = tk.IntVar()
-		self.topTeamGenderMRadiobutton = tk.Radiobutton(self.topTeamWindow, text="Male", variable=self.topTeamGenderVar, value=0)
+		self.topTeamGenderMRadiobutton = tk.Radiobutton(self.topTeamWindow, text="Men", variable=self.topTeamGenderVar, value=0)
 		self.topTeamGenderMRadiobutton.pack()
 
-		self.topTeamGenderWRadiobutton = tk.Radiobutton(self.topTeamWindow, text="Female", variable=self.topTeamGenderVar, value=1) 
+		self.topTeamGenderWRadiobutton = tk.Radiobutton(self.topTeamWindow, text="Women", variable=self.topTeamGenderVar, value=1) 
 		self.topTeamGenderWRadiobutton.pack()
 
 		self.loweryearlabel = tk.Label(self.topTeamWindow,text = 'From:')
-		self.loweryearlabel.pack()
+		self.loweryearlabel.pack(pady = self.elementPadding)
 		currentYear = t.Date.Today().year
 		self.topTeamStartYearSpinbox = tk.Spinbox(self.topTeamWindow, from_=2000, to=currentYear,state = 'readonly')
 		self.topTeamStartYearSpinbox.pack()
 
 		self.upperyearlabel = tk.Label(self.topTeamWindow,text = 'To:')
-		self.upperyearlabel.pack()
+		self.upperyearlabel.pack(pady = self.elementPadding)
 		self.topTeamEndYearSpinbox = tk.Spinbox(self.topTeamWindow, from_= 2000, to=currentYear,state = 'readonly')
 		self.topTeamEndYearSpinbox.pack()
 
 
-		self.exectopTeamCountryBtn = tk.Button(self.topTeamWindow,text = 'Show results',command = self.TopTeamCountryExec)
-		self.exectopTeamCountryBtn.pack()
+		self.exectopTeamCountryBtn = tk.Button(self.topTeamWindow,text = 'Show',command = self.TopTeamCountryExec)
+		self.exectopTeamCountryBtn.pack(pady = self.elementPadding)
 
 	def TopTeamCountryExec(self):
 		country = self.topTeamCountryCombobox.get()
@@ -460,7 +549,7 @@ class MainMenu(tk.Tk):
 		else:
 			tabFisCodes = op.TeamAthletesPrediction(self.athletes,country,hillSizeName,startYear,endYear,gender)
 			if len(tabFisCodes) < 4:
-				tk.messagebox.showwarning('Warning','There is not enough competitors to foram a team!')
+				tk.messagebox.showwarning('Warning','There is not enough competitors to form a team!')
 			else:
 				tabAthletes = []
 				for i in range(len(tabFisCodes)):
@@ -475,7 +564,7 @@ class MainMenu(tk.Tk):
 		#sub.geometry("400x400")
 
 
-		header = ("Rank","Distance 1","Points 1","Distance 2","Points 2","Total points","Hill rating","Hill size","Location","Date")
+		header = ("Place","Category","Distance 1","Points 1","Distance 2","Points 2","Total points","Hill rating","Hill size","Location","Date")
 
 		rows = [header]
 
@@ -483,11 +572,15 @@ class MainMenu(tk.Tk):
 			i,j,k = result
 			resultRow = []
 
-			resultRow.append(str(k + 1)) # Rank
+			
 
 			event = self.events[i]
 			competition = self.events[i].competitions[j]
 			personalResult = self.events[i].competitions[j].results[k]
+
+			resultRow.append(str(k + 1)) # Rank
+
+			resultRow.append(competition.category)
 
 			distance1 = personalResult.distance1
 			resultRow.append(f"{distance1:.1f}" if distance1 != None else "")
@@ -528,29 +621,31 @@ class MainMenu(tk.Tk):
 		self.displaySoloResultsWindow = tk.Toplevel(self)
 		self.displaySoloResultsWindow.wm_title("Solo results")
 		self.displaySoloResultsWindow.resizable(False,False)
-		self.displaySoloResultsWindow.geometry("400x400")
+		self.displaySoloResultsWindow.geometry("400x225")
 
 		self.soloResultsNamelabel = tk.Label(self.displaySoloResultsWindow,text = 'Name:')
-		self.soloResultsNamelabel.pack()
+		self.soloResultsNamelabel.pack(pady = self.elementPadding)
 		self.soloResultsNamebox = tk.Text(self.displaySoloResultsWindow,height = 1,width = 25)
-		self.soloResultsSurnamelabel = tk.Label(self.displaySoloResultsWindow,text = 'Surname:')
-		self.soloResultsSurnamelabel.pack()
-		self.soloResultsSurnamebox = tk.Text(self.displaySoloResultsWindow,height = 1,width = 25)
 		self.soloResultsNamebox.pack()
+
+		self.soloResultsSurnamelabel = tk.Label(self.displaySoloResultsWindow,text = 'Surname:')
+		self.soloResultsSurnamelabel.pack(pady = self.elementPadding)
+		self.soloResultsSurnamebox = tk.Text(self.displaySoloResultsWindow,height = 1,width = 25)
 		self.soloResultsSurnamebox.pack()
 
 		self.soloResultsStartYearLowerlabel = tk.Label(self.displaySoloResultsWindow,text = 'From:')
-		self.soloResultsStartYearLowerlabel.pack()
+		self.soloResultsStartYearLowerlabel.pack(pady = self.elementPadding)
 		currentYear = t.Date.Today().year
 		self.soloResultsStartYearSpin = tk.Spinbox(self.displaySoloResultsWindow, from_= 2000, to= currentYear,state = 'readonly')
-		self.soloResultsStartYearupperlabel = tk.Label(self.displaySoloResultsWindow,text = 'To:')
-		self.soloResultsStartYearupperlabel.pack()
-		self.soloResultsEndYearSpin = tk.Spinbox(self.displaySoloResultsWindow, from_= 2000, to= currentYear,state = 'readonly')
 		self.soloResultsStartYearSpin.pack()
+
+		self.soloResultsStartYearupperlabel = tk.Label(self.displaySoloResultsWindow,text = 'To:')
+		self.soloResultsStartYearupperlabel.pack(pady = self.elementPadding)
+		self.soloResultsEndYearSpin = tk.Spinbox(self.displaySoloResultsWindow, from_= 2000, to= currentYear,state = 'readonly')
 		self.soloResultsEndYearSpin.pack()
 
 		self.soloResultsButtonExec = tk.Button(self.displaySoloResultsWindow,text = "Show results",command = self.DisplaySoloResultsExec)
-		self.soloResultsButtonExec.pack()
+		self.soloResultsButtonExec.pack(pady = self.elementPadding)
 
 	def DisplaySoloResultsExec(self):
 		name = self.soloResultsNamebox.get("1.0",tk.END).strip()
@@ -576,70 +671,152 @@ class MainMenu(tk.Tk):
 
 			self.ShowSoloResults(self.displaySoloResultsWindow,athlete,soloResults)
 
+	def ShowTeamCountryResults(self,master,teamComps,country):
+		sub = tk.Toplevel(self.teamResultsWindow)
+		sub.wm_title(f"Team results for {country}")
+		sub.resizable(False,False)
+		#self.teamResultsWindow.geometry("400x400")
+		
+		header = ("Place","Category","Gender","Name","Surname","birthYear","Distance 1","Points 1","Distance 2","Points 2","Total points","Location","Date")
+
+		rows = [header]
+		for result in teamComps:
+			i,j,k = result
+			event = self.events[i]
+			competition = self.events[i].competitions[j]
+			teamResult = self.events[i].competitions[j].results[k]
+
+			resultRow = []
+
+			rank = k + 1
+			resultRow.append(str(rank))
+
+			category = competition.category
+			resultRow.append(category)
+
+			gender = competition.gender
+			resultRow.append(gender)
+
+			resultRow.extend(["","","","","","",""])
+
+			totalPoints = teamResult.totalPoints
+			resultRow.append(f"{totalPoints:.1f}")
+
+			location = event.country
+			resultRow.append(location)
+
+			date = competition.date
+			resultRow.append(date)
+
+			rows.append(resultRow)
+
+			for l in range(len(teamResult.results)):
+				resultRow = []
+				resultRow.extend(["","",""])
+
+				personalResult = teamResult.results[l]
+
+				name = personalResult.name
+				resultRow.append(name)
+
+				surname = personalResult.surname
+				resultRow.append(surname)
+
+				birthYear = personalResult.birthYear
+				resultRow.append(str(birthYear) if birthYear != None else "")
+
+				distance1 = personalResult.distance1
+				resultRow.append(f"{distance1:.1f}" if distance1 != None else "")
+
+				points1 = personalResult.points1
+				resultRow.append(f"{points1:.1f}" if points1 != None else "")
+
+				distance2 = personalResult.distance2
+				resultRow.append(f"{distance2:.1f}" if distance2 != None else "")
+
+				points2 = personalResult.points2
+				resultRow.append(f"{points2:.1f}" if points2 != None else "")
+
+				totalPoints = personalResult.totalPoints
+				resultRow.append(f"{totalPoints:.1f}" if totalPoints != None else "")
+
+				resultRow.extend(["",""])
+
+				rows.append(resultRow)
+
+		for i in range(len(rows)):
+			for j in range(len(rows[0])):
+				self.teamResultEntry = tk.Entry(sub, width=20)
+				self.teamResultEntry.grid(row = i,column = j)
+				self.teamResultEntry.insert(tk.END,rows[i][j])
 
 	def DisplayTeamResults(self):
-		sub = tk.Toplevel(self)
-		sub.wm_title("Team results")
-		sub.resizable(False,False)
-		sub.geometry("400x400")
+		self.teamResultsWindow = tk.Toplevel(self)
+		self.teamResultsWindow.wm_title("Team results")
+		self.teamResultsWindow.resizable(False,False)
+		self.teamResultsWindow.geometry("400x180")
 
 		countries = sorted(['GER','AUT','JPN','FIN','NOR','POL','SLO','CZE','RUS','SUI'])
 
-		self.displayTeamResultsCountrieslabel = tk.Label(sub,text = 'Country')
-		self.displayTeamResultsCountrieslabel.pack()
-		self.displayTeamResultsCountriesCombobox= ttk.Combobox(sub,values = countries,state = 'readonly')
+		self.displayTeamResultsCountrieslabel = tk.Label(self.teamResultsWindow,text = 'Country')
+		self.displayTeamResultsCountrieslabel.pack(pady = self.elementPadding)
+		self.displayTeamResultsCountriesCombobox= ttk.Combobox(self.teamResultsWindow,values = countries,state = 'readonly')
 		self.displayTeamResultsCountriesCombobox.pack()
 
-		self.lowerYearlabel = tk.Label(sub,text = 'From')
-		self.lowerYearlabel.pack()
-		self.displayTeamResultsStartYearSpinbox = tk.Spinbox(sub, from_=2000, to=2021,state = 'readonly')
+		self.lowerYearlabel = tk.Label(self.teamResultsWindow,text = 'From:')
+		self.lowerYearlabel.pack(pady = self.elementPadding)
+		self.displayTeamResultsStartYearSpinbox = tk.Spinbox(self.teamResultsWindow, from_=2000, to=2021,state = 'readonly')
 		self.displayTeamResultsStartYearSpinbox.pack()
 
-		self.upperYearlabel = tk.Label(sub,text = 'To')
-		self.upperYearlabel.pack()
-		self.displayTeamResultsEndtYearSpinbox = tk.Spinbox(sub, from_= 2000, to=2021,state = 'readonly')
+		self.upperYearlabel = tk.Label(self.teamResultsWindow,text = 'To:')
+		self.upperYearlabel.pack(pady = self.elementPadding)
+		self.displayTeamResultsEndtYearSpinbox = tk.Spinbox(self.teamResultsWindow, from_= 2000, to=2021,state = 'readonly')
 		self.displayTeamResultsEndtYearSpinbox.pack()
 
 
-		self.execdisplayTeamResultBtn = tk.Button(sub,text = 'Show results',command = self.DisplayTeamResultsExec)
-		self.execdisplayTeamResultBtn.pack()
+		self.execdisplayTeamResultBtn = tk.Button(self.teamResultsWindow,text = 'Show results',command = self.DisplayTeamResultsExec)
+		self.execdisplayTeamResultBtn.pack(pady = self.elementPadding)
 
 	def DisplayTeamResultsExec(self):
-		if int(self.displayTeamResultsEndtYearSpinbox.get()) < int(self.displayTeamResultsEndtYearSpinbox.get()):
-			tk.messagebox.showwarning(title='Warning', message='Selected start year must be below selected end year.')
+		endYear = int(self.displayTeamResultsEndtYearSpinbox.get())
+		startYear = int(self.displayTeamResultsEndtYearSpinbox.get())
+		if endYear < startYear:
+			tk.messagebox.showwarning('Warning','Selected start year must be below selected end year.')
 		else:
 			tabTeamResults = []
-			start = int(self.displayTeamResultsStartYearSpinbox.get())
-			end = int(self.displayTeamResultsEndtYearSpinbox.get())
+			alreadyWritten = set()
 			country = self.displayTeamResultsCountriesCombobox.get()
 			for athlete in self.athletes:
 				if athlete.country == country:
 					for result in athlete.personalResults:
 						if len(result) == 4:	
 							i,j,k,l = result
-							if start <= athlete.events[i].competitions[j].date.year <= end:
-								tabTeamResults.append(result)
-							
-			
+							if startYear <= athlete.events[i].competitions[j].date.year <= endYear:
+								if result not in alreadyWritten:
+									tabTeamResults.append((i,j,k))
+									alreadyWritten.add((i,j,k))
+
+			self.ShowTeamCountryResults(self.teamResultsWindow,tabTeamResults,country)
+
 
 	def GraphNumMedalsSolo(self):
 		sub = tk.Toplevel(self)
-		sub.wm_title("Solo results")
+		sub.wm_title("Number of medals per competitor")
 		sub.resizable(False,False)
-		sub.geometry("400x400")
+		sub.geometry("400x130")
 
-		self.numMedalsSoloNamelabel = tk.Label(sub,text = 'Name')
-		self.numMedalsSoloNamelabel.pack()
+		self.numMedalsSoloNamelabel = tk.Label(sub,text = 'Name:')
+		self.numMedalsSoloNamelabel.pack(pady = self.elementPadding)
 		self.numMedalsSoloNamebox = tk.Text(sub,height = 1,width = 25)
 		self.numMedalsSoloNamebox.pack()
-		self.numMedalsSoloSurnamelabel = tk.Label(sub,text = 'Surname')
-		self.numMedalsSoloSurnamelabel.pack()
+		self.numMedalsSoloSurnamelabel = tk.Label(sub,text = 'Surname:')
+		self.numMedalsSoloSurnamelabel.pack(pady = self.elementPadding)
 		self.numMedalsSoloSurnamebox = tk.Text(sub,height = 1,width = 25)
 		self.numMedalsSoloSurnamebox.pack()
 	
 
-		self.numMedalsSoloButtonExec = tk.Button(sub,text = "Show results",command = self.GraphNumMedalsSoloExec)
-		self.numMedalsSoloButtonExec.pack()
+		self.numMedalsSoloButtonExec = tk.Button(sub,text = "Graph",command = self.GraphNumMedalsSoloExec)
+		self.numMedalsSoloButtonExec.pack(pady = self.elementPadding)
 	
 	def GraphNumMedalsSoloExec(self):
 		name = self.numMedalsSoloNamebox.get("1.0",tk.END).strip()
@@ -677,19 +854,19 @@ class MainMenu(tk.Tk):
 
 	def GraphNumMedalsTeam(self):
 		sub = tk.Toplevel(self)
-		sub.wm_title("Team medals")
+		sub.wm_title("Number of team medals")
 		sub.resizable(False,False)
-		sub.geometry("400x400")
+		sub.geometry("400x85")
 
 		countries = sorted(['GER','AUT','JPN','FIN','NOR','POL','SLO','CZE','RUS','SUI'])
 		
-		self.graphNUmberTeamsCountrylabel = tk.Label(sub,text = 'Country')
-		self.graphNUmberTeamsCountrylabel.pack()
+		self.graphNUmberTeamsCountrylabel = tk.Label(sub,text = 'Country:')
+		self.graphNUmberTeamsCountrylabel.pack(pady = self.elementPadding)
 		self.graphNUmberTeamsCountryCombobox= ttk.Combobox(sub,values = countries,state = 'readonly')
 		self.graphNUmberTeamsCountryCombobox.pack()
 
-		self.execgraphNUmberTeamsCountryBtn = tk.Button(sub,text = 'Show results',command = self.GraphNumMedalsTeamExec)
-		self.execgraphNUmberTeamsCountryBtn.pack()
+		self.execgraphNUmberTeamsCountryBtn = tk.Button(sub,text = 'Graph',command = self.GraphNumMedalsTeamExec)
+		self.execgraphNUmberTeamsCountryBtn.pack(pady = self.elementPadding)
 
 	def GraphNumMedalsTeamExec(self):
 		allYears = set()
@@ -721,28 +898,28 @@ class MainMenu(tk.Tk):
 		sub = tk.Toplevel(self)
 		sub.wm_title("Comparison")
 		sub.resizable(False,False)
-		sub.geometry("400x400")
+		sub.geometry("400x325")
 
 		self.CompareTotalScoresName1label = tk.Label(sub,text = 'Name:')
-		self.CompareTotalScoresName1label.pack()
+		self.CompareTotalScoresName1label.pack(pady = self.elementPadding)
 		self.CompareTotalScoresNamebox1 = tk.Text(sub,height = 1,width = 25)
 		self.CompareTotalScoresNamebox1.pack()
 		self.CompareTotalScoresSurname1label = tk.Label(sub,text = 'Surname:')
-		self.CompareTotalScoresSurname1label.pack()
+		self.CompareTotalScoresSurname1label.pack(pady = self.elementPadding)
 		self.CompareTotalScoresSurnamebox1 = tk.Text(sub,height = 1,width = 25)
 		self.CompareTotalScoresSurnamebox1.pack()
 
 		self.CompareTotalScoresName2label = tk.Label(sub,text = 'Name:')
-		self.CompareTotalScoresName2label.pack()
+		self.CompareTotalScoresName2label.pack(pady = self.elementPadding)
 		self.CompareTotalScoresNamebox2 = tk.Text(sub,height = 1,width = 25)
 		self.CompareTotalScoresNamebox2.pack()
 		self.CompareTotalScoresSurname2label = tk.Label(sub,text = 'Surname:')
-		self.CompareTotalScoresSurname2label.pack()
+		self.CompareTotalScoresSurname2label.pack(pady = self.elementPadding)
 		self.CompareTotalScoresSurnamebox2 = tk.Text(sub,height = 1,width = 25)
 		self.CompareTotalScoresSurnamebox2.pack()
 
-		self.CompareTotalScoresHillSizelabel = tk.Label(sub,text = 'Hill size:')
-		self.CompareTotalScoresHillSizelabel.pack()
+		self.CompareTotalScoresHillSizelabel = tk.Label(sub,text = 'Hill ranking:')
+		self.CompareTotalScoresHillSizelabel.pack(pady = self.elementPadding)
 		self.CompareTotalScoresHillSizeNameVar = tk.IntVar(sub,0)
 		self.CompareTotalScoresHillSize1Radio = tk.Radiobutton(sub,text = "Normal hill",variable = self.CompareTotalScoresHillSizeNameVar,value = 0) # 85–109
 		self.CompareTotalScoresHillSize2Radio = tk.Radiobutton(sub,text = "Large hill",variable = self.CompareTotalScoresHillSizeNameVar,value = 1) # 110–184
@@ -752,8 +929,8 @@ class MainMenu(tk.Tk):
 		self.CompareTotalScoresHillSize3Radio.pack()
 
 
-		self.execCompareTotalScoresBtn = tk.Button(sub,text = 'Show results',command = self.CompareTotalScoresExec)
-		self.execCompareTotalScoresBtn.pack()
+		self.execCompareTotalScoresBtn = tk.Button(sub,text = 'Compare',command = self.CompareTotalScoresExec)
+		self.execCompareTotalScoresBtn.pack(pady = self.elementPadding)
 
 	def CompareTotalScoresExec(self):
 		HillSizeVar = self.CompareTotalScoresHillSizeNameVar.get()
@@ -769,7 +946,7 @@ class MainMenu(tk.Tk):
 
 		if fisCode1 == None:  
 			tk.messagebox.showwarning("Warning",f"Name {name1} {surname1} not found!")
-		if fisCode2 == None:
+		elif fisCode2 == None:
 			tk.messagebox.showwarning("Warning",f"Name {name2} {surname2} not found!")
 		else:
 			athlete1 = self.athletes[self.fisCodeMap[fisCode1]]
@@ -812,7 +989,7 @@ class MainMenu(tk.Tk):
 				tabAverageTotalPoints2.append(sum(y2)/len(y2) if len(y2) != 0 else 0)
 				y2 = []
 
-			charts.LineChart(x,(tabAverageTotalPoints1,tabAverageTotalPoints2),f'Comparison between {athlete1.name} {athlete1.surname} and {athlete2.name} {athlete2.surname}','Year','Average total points',[athlete1.surname,athlete2.surname])
+			charts.LineChart(x,(tabAverageTotalPoints1,tabAverageTotalPoints2),f'Comparison between {athlete1.name} {athlete1.surname} and {athlete2.name} {athlete2.surname} on {HillSizeName}','Year','Average total points',[athlete1.surname,athlete2.surname])
 
 
 
