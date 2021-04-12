@@ -30,3 +30,5 @@ spletne strani https://www.fis-ski.com/DB/ski-jumping/calendar-results.html.
 ## Opomba
 Če prenašanje datotek traja predolgo, potem lahko v mapo data prekopirate datoteke iz
 arhiva data.zip.
+
+Program zaženemo tako, da poženemo: python main.py
