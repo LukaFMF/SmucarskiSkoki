@@ -563,6 +563,9 @@ class MainMenu(tk.Tk):
 		sub.resizable(False,False)
 		#sub.geometry("400x400")
 
+		if len(soloResults) > 40:
+			soloResults = soloResults[:40]
+			tk.messagebox.showinfo("Too many results","There are too many team results, showing only 40.")
 
 		header = ("Place","Category","Distance 1","Points 1","Distance 2","Points 2","Total points","Hill rating","Hill size","Location","Date")
 
@@ -571,8 +574,6 @@ class MainMenu(tk.Tk):
 		for result in soloResults:
 			i,j,k = result
 			resultRow = []
-
-			
 
 			event = self.events[i]
 			competition = self.events[i].competitions[j]
@@ -671,16 +672,20 @@ class MainMenu(tk.Tk):
 
 			self.ShowSoloResults(self.displaySoloResultsWindow,athlete,soloResults)
 
-	def ShowTeamCountryResults(self,master,teamComps,country):
+	def ShowTeamCountryResults(self,master,teamReslts,country):
 		sub = tk.Toplevel(self.teamResultsWindow)
 		sub.wm_title(f"Team results for {country}")
 		sub.resizable(False,False)
 		#self.teamResultsWindow.geometry("400x400")
+
+		if len(teamReslts) > 10:
+			teamReslts = teamReslts[:10]
+			tk.messagebox.showinfo("Too many results","There are too many team results, showing only 10.")
 		
 		header = ("Place","Category","Gender","Name","Surname","birthYear","Distance 1","Points 1","Distance 2","Points 2","Total points","Location","Date")
 
 		rows = [header]
-		for result in teamComps:
+		for result in teamReslts:
 			i,j,k = result
 			event = self.events[i]
 			competition = self.events[i].competitions[j]
